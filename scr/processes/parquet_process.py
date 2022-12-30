@@ -1,25 +1,27 @@
 from ..parquet import *
-import threading
-import multiprocessing
-import time
-import sys
 import scr.config as config
+from scr.processes.base_process import BaseProcess
 
 
-class ParquetProcess(multiprocessing.Process):
-    def __init__(self, queue_to_write_parquet):
-        multiprocessing.Process.__init__(self)
-        self.queue_to_write_parquet = queue_to_write_parquet
+class ParquetProcess(BaseProcess):
+    def __init__(self, pipe_to_ui,pipe_to_camera, pipe_to_main):
+        super().__init__(pipe_to_main)
         self.parquet_worker = ParquetWorker()
+        self.pipe_to_main = pipe_to_main
+        self.pipe_to_ui = pipe_to_ui
+        self.pipe_to_camera = pipe_to_camera
 
     def run(self):
         self.action()
 
     def action(self):
-        time.sleep(5)
-        while config.PROGRAM_FINISH:
-            if self.queue_to_write_parquet.empty():
-                pass
+
+        while True:
+            if self.pipe_to_camera.poll(timeout=1):
+                task = self.pipe_to_camera.recv()
+                task.write_execution_data()
+                name, data = task.get_data()
+                if name == 'Write to parquet':
+                    self.parquet_worker.write_to_parquet_from_list(data, config.TITTLE)
             else:
-                data_to_write = self.queue_to_write_parquet.get()
-                self.parquet_worker.write_to_parquet_from_list(data_to_write, config.TITTLE)
+                pass

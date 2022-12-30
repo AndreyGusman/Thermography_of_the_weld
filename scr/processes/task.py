@@ -13,6 +13,7 @@ class Task:
         self.process_executor = None
         self.thread_executor = None
         self.execution_time = None
+        self.exception = None
         self.result = None
 
     def write_init_data(self):
@@ -30,3 +31,7 @@ class Task:
 
     def set_negative_result(self):
         self.result = False
+
+    def get_data(self):
+        return self.name, self.data
+

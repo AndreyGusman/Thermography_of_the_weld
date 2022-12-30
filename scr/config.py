@@ -1,6 +1,6 @@
 # константы системы
 MAX_QUEUE_SIZE = 10
-PROGRAM_FINISH = True
+PROGRAM_CAMERA_CLOSE = False
 
 # константы камеры
 USE_NOTEBOOK_CAMERA = True  # тестовый режим камеры

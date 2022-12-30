@@ -1,20 +1,21 @@
 from ..interface import *
 import threading
-import multiprocessing
-import time
+from scr.processes.base_process import BaseProcess
 import sys
-import scr.config as config
 
 
-class UIProcess(multiprocessing.Process):
-    def __init__(self, queue):
-        multiprocessing.Process.__init__(self)
+
+class UIProcess(BaseProcess):
+    def __init__(self, pipe_to_parquet, pipe_to_camera, pipe_to_main):
+        super().__init__(pipe_to_main)
         self.t2 = None
         self.t1 = None
         self.ui = None
         self.app = None
         self.MainWindow = None
-        self.queue = queue
+        self.pipe_to_main = pipe_to_main
+        self.pipe_to_parquet = pipe_to_parquet
+        self.pipe_to_camera = pipe_to_camera
 
     def run(self):
         self.create_threading()
@@ -26,11 +27,8 @@ class UIProcess(multiprocessing.Process):
         self.t1.start()
 
         self.t1.join()
-        print('thread 1 finish')
-        config.PROGRAM_FINISH = False
-        self.t2.join()
 
-        print('thread 2 finish')
+        self.t2.join()
 
     def thread_1_task(self):
         self.ui, self.app, self.MainWindow = UiMainWindow.create_ui()
@@ -40,11 +38,13 @@ class UIProcess(multiprocessing.Process):
         sys.exit(self.app.exec_())
 
     def thread_2_task(self):
-        while config.PROGRAM_FINISH:
-            if self.queue.empty():
-                pass
+        while True:
+            if self.pipe_to_camera.poll(timeout=1):
+                task = self.pipe_to_camera.recv()
+                task.write_execution_data()
+                name, data = task.get_data()
+                if name == 'Show img':
+                    UiMainWindow.update_current_img(data[0], self.ui, self.MainWindow, False)
+                    UiMainWindow.update_broke_img(data[1], self.ui, self.MainWindow, True)
             else:
-
-                list_img = self.queue.get()
-                UiMainWindow.update_current_img(list_img[0], self.ui, self.MainWindow, False)
-                UiMainWindow.update_broke_img(list_img[1], self.ui, self.MainWindow, True)
+                pass
