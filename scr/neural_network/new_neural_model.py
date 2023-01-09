@@ -2,7 +2,6 @@ import keras
 from keras.models import Sequential
 from keras.layers import Dense, Flatten
 from keras.layers import MaxPooling2D, Conv2D
-import scr.config as config
 
 
 class NewNeuralModel:
@@ -15,10 +14,10 @@ class NewNeuralModel:
         pass
 
     @staticmethod
-    def create_new_cnn_model():
+    def create_new_cnn_model(input_shape):
         new_model = Sequential()
         new_model.add(
-            Conv2D(16, (3, 3), padding='same', activation='relu', input_shape=config.INPUT_SHAPE))
+            Conv2D(16, (3, 3), padding='same', activation='relu', input_shape=input_shape))
         new_model.add(Conv2D(16, (3, 3), padding='same', activation='relu'))
         new_model.add(MaxPooling2D((2, 2), strides=2))
         new_model.add(Conv2D(32, (3, 3), padding='same', activation='relu'))

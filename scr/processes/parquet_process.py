@@ -1,5 +1,4 @@
 from ..parquet import *
-import scr.config as config
 from scr.processes.base_process import BaseProcess
 
 
@@ -22,6 +21,6 @@ class ParquetProcess(BaseProcess):
                 task.write_execution_data()
                 name, data = task.get_data()
                 if name == 'Write to parquet':
-                    self.parquet_worker.write_to_parquet_from_list(data, config.TITTLE)
+                    self.parquet_worker.write_to_parquet_from_list(data, self.parquet_worker.config.TITTLE)
             else:
                 pass

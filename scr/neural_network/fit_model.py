@@ -2,7 +2,6 @@ from tensorflow import keras
 
 import matplotlib as plt
 import numpy as np
-import scr.config as config
 
 
 class InterfaceFitModel:
@@ -10,8 +9,9 @@ class InterfaceFitModel:
         pass
 
     @staticmethod
-    def fit_model(model: keras.Sequential, x_train: np.array, y_train: np.array, batch_size=config.BATCH_SIZE,
-                  epochs=config.EPOCHS):
+    def fit_model(model: keras.Sequential, x_train: np.array, y_train: np.array,
+                  batch_size,
+                  epochs):
         history = model.fit(x=x_train, y=y_train, batch_size=batch_size, epochs=epochs)
 
         return history

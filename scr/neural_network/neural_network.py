@@ -2,7 +2,7 @@ import numpy as np
 from tensorflow import keras
 from scr.neural_network.new_neural_model import NewNeuralModel
 from scr.neural_network.fit_model import InterfaceFitModel
-import scr.config as config
+from scr.config import Config
 
 
 class NeuralNetwork(NewNeuralModel, InterfaceFitModel):
@@ -11,6 +11,7 @@ class NeuralNetwork(NewNeuralModel, InterfaceFitModel):
         self.working_model = None
         self.x_train = None
         self.y_train = None
+        self.config = Config()
 
     def model_test(self):
         history = self.working_model.evaluate(self.x_train, self.y_train)
@@ -18,7 +19,7 @@ class NeuralNetwork(NewNeuralModel, InterfaceFitModel):
         return history
 
     def model_predict(self, input_arr):
-        predict = self.working_model.predict(input_arr, batch_size=config.BATCH_SIZE)
+        predict = self.working_model.predict(input_arr, batch_size=self.config.BATCH_SIZE)
         return predict
 
     def get_summary(self):

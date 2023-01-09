@@ -11,11 +11,12 @@ class CameraAndNNProcess(BaseProcess):
         self.camera = Camera()
         self.pipe_to_parquet = pipe_to_parquet
         self.pipe_to_ui = pipe_to_ui
+        self.command_close_capture = False
 
     def run(self):
         self.create_cup()
         self.create_logging_task(data='Camera capture establish')
-        while not config.PROGRAM_CAMERA_CLOSE:
+        while not self.command_close_capture:
             list_img = self.get_img_from_camera()
             self.create_task(name='Show img', data=list_img, connect=self.pipe_to_ui)
             self.create_task(name='Write to parquet', data=self.create_task_to_write_parquet(list_img),
@@ -38,9 +39,10 @@ class CameraAndNNProcess(BaseProcess):
         img_to_parquet = list.copy(img_list)
         img_to_parquet[0] = self.camera.convert_img_to_one_row(img_to_parquet[0])
         img_to_parquet[1] = self.camera.convert_img_to_one_row(img_to_parquet[1])
-        value = [time.time(), random.randint(10, 10000), random.random(),
-                 config.OUT_FRAME_WIDTH * config.OUT_FRAME_HEIGHT, list(img_to_parquet[0]), list(img_to_parquet[1])]
-        return value
+        data_frame = [time.time(), random.randint(10, 10000), random.random(),
+                      self.camera.config.OUT_FRAME_WIDTH * self.camera.config.OUT_FRAME_HEIGHT, list(img_to_parquet[0]),
+                      list(img_to_parquet[1])]
+        return data_frame
 
 
 if __name__ == "__main__":

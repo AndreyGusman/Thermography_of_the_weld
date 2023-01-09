@@ -1,37 +1,42 @@
-# константы системы
-MAX_QUEUE_SIZE = 10
-PROGRAM_CAMERA_CLOSE = False
+from dataclasses import dataclass
 
-# константы камеры
-USE_NOTEBOOK_CAMERA = True  # тестовый режим камеры
 
-CAMERA_NAME = 0  # путь захвата изображения камеры
+@dataclass
+class Config:
+    # константы системы
+    MAX_QUEUE_SIZE: int = 10
+    PROGRAM_CAMERA_CLOSE: bool = False
 
-SOURCE_FRAME_WIDTH = 640  # размеры исходного изображения
-SOURCE_FRAME_HEIGHT = 480
+    # константы камеры
+    USE_NOTEBOOK_CAMERA: bool = True  # тестовый режим камеры
 
-ROTATION_ANGLE = 0  # поворот изображения (кратно 90!)
+    CAMERA_NAME: int = 0  # путь захвата изображения камеры
 
-OUT_FRAME_WIDTH = 500  # размеры выходного изображения
-OUT_FRAME_HEIGHT = 500
+    SOURCE_FRAME_WIDTH: int = 640  # размеры исходного изображения
+    SOURCE_FRAME_HEIGHT: int = 480
 
-CAMERA_ADC = 8  # глубина цвета пикселя камеры
+    ROTATION_ANGLE: int = 0  # поворот изображения (кратно 90!)
 
-CONVERT_TO_8BIT = False  # перевод изображения в 8-ми битный режим
+    OUT_FRAME_WIDTH: int = 500  # размеры выходного изображения
+    OUT_FRAME_HEIGHT: int = 500
 
-NORMALIZATION = False  # перевод значения пикселей к диапазону 0..1
+    CAMERA_ADC: int = 8  # глубина цвета пикселя камеры
 
-# настройки создания и обучения нейросетей
-# создание сети
-INPUT_SHAPE = (
-    OUT_FRAME_HEIGHT,
-    OUT_FRAME_WIDTH,
-    1)  # входная размерность нейросети ширина, высота, колличество каналов
+    CONVERT_TO_8BIT: bool = False  # перевод изображения в 8-ми битный режим
 
-# тренировка сети
-BATCH_SIZE = 4
-EPOCHS = 10
+    NORMALIZATION: bool = False  # перевод значения пикселей к диапазону 0..1
 
-# настройки работы с паркетом
-WORKING_DIRECTORY = ""
-TITTLE = ['Time', 'Length', 'defect', 'Size', 'Image', 'Defect image']
+    # настройки создания и обучения нейросетей
+    # создание сети
+    INPUT_SHAPE: tuple = (
+        OUT_FRAME_HEIGHT,
+        OUT_FRAME_WIDTH,
+        1)  # входная размерность нейросети ширина, высота, колличество каналов
+
+    # тренировка сети
+    BATCH_SIZE: int = 4
+    EPOCHS: int = 10
+
+    # настройки работы с parquet
+    WORKING_DIRECTORY: str = ""
+    TITTLE: list = list['Time', 'Length', 'defect', 'Size', 'Image', 'Defect image']

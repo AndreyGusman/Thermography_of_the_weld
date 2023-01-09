@@ -4,7 +4,6 @@ from scr.processes.base_process import BaseProcess
 import sys
 
 
-
 class UIProcess(BaseProcess):
     def __init__(self, pipe_to_parquet, pipe_to_camera, pipe_to_main):
         super().__init__(pipe_to_main)

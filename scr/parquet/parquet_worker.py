@@ -1,19 +1,15 @@
 import time
 
-import scr.config as config
+from scr.config import Config
 
-import pyarrow.parquet as pq
 import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-from datetime import datetime
-import random
 
 
 class ParquetWorker:
 
     def __init__(self):
         self.data_buf = []
+        self.config = Config()
 
     def write_to_parquet_from_list(self, data: list, title: list, parquet_file_path: str = '',
                                    parquet_file_name: str = 'db.parquet'):
@@ -24,12 +20,11 @@ class ParquetWorker:
             for i in range(1, len(self.data_buf)):
                 df.loc[len(df.index)] = self.data_buf[i]
             start_time = time.time()
-            df.to_parquet(f"{config.WORKING_DIRECTORY}{parquet_file_path}{parquet_file_name}")
+            df.to_parquet(f"{self.config.WORKING_DIRECTORY}{parquet_file_path}{parquet_file_name}")
             print(f'parquet write need {time.time() - start_time}s')
             self.data_buf.clear()
 
-    @staticmethod
-    def write_to_parquet_from_dict(data: dict, parquet_file_path: str = '',
+    def write_to_parquet_from_dict(self, data: dict, parquet_file_path: str = '',
                                    parquet_file_name: str = 'db.parquet'):
         df = pd.DataFrame(data)
-        df.to_parquet(f"{config.WORKING_DIRECTORY}{parquet_file_path}{parquet_file_name}")
+        df.to_parquet(f"{self.config.WORKING_DIRECTORY}{parquet_file_path}{parquet_file_name}")
