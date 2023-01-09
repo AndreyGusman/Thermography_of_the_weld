@@ -21,8 +21,9 @@ class ParquetWorker:
                 df.loc[len(df.index)] = self.data_buf[i]
             start_time = time.time()
             df.to_parquet(f"{self.config.WORKING_DIRECTORY}{parquet_file_path}{parquet_file_name}")
-            print(f'parquet write need {time.time() - start_time}s')
             self.data_buf.clear()
+            return f'parquet write need {time.time() - start_time}s'
+        return None
 
     def write_to_parquet_from_dict(self, data: dict, parquet_file_path: str = '',
                                    parquet_file_name: str = 'db.parquet'):

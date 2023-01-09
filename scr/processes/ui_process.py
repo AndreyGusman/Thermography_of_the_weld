@@ -38,7 +38,7 @@ class UIProcess(BaseProcess):
 
     def thread_2_task(self):
         while True:
-            if self.pipe_to_camera.poll(timeout=1):
+            if self.pipe_to_camera.poll(timeout=0.1):
                 task = self.pipe_to_camera.recv()
                 task.write_execution_data()
                 name, data = task.get_data()

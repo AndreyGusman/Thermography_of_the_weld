@@ -14,13 +14,15 @@ class ParquetProcess(BaseProcess):
         self.action()
 
     def action(self):
+        self.create_logging_task(data='parquet working create')
 
         while True:
-            if self.pipe_to_camera.poll(timeout=1):
+            if self.pipe_to_camera.poll(timeout=0.1):
                 task = self.pipe_to_camera.recv()
-                task.write_execution_data()
-                name, data = task.get_data()
+                name, data, _ = self.decode_task(task)
                 if name == 'Write to parquet':
-                    self.parquet_worker.write_to_parquet_from_list(data, self.parquet_worker.config.TITTLE)
+                    answer = self.parquet_worker.write_to_parquet_from_list(data, self.parquet_worker.config.TITTLE)
+                    if answer is not None:
+                        self.create_logging_task(data=answer)
             else:
                 pass

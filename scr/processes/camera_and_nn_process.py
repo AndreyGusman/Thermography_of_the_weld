@@ -1,5 +1,4 @@
 from ..camera import Camera
-import scr.config as config
 from scr.processes.base_process import BaseProcess
 import time
 import random

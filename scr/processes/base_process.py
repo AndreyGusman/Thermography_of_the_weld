@@ -21,7 +21,7 @@ class BaseProcess(multiprocessing.Process):
         connect.send(task)
 
     @staticmethod
-    def task_decoder(task: Task):
+    def decode_task(task: Task):
         name, data = task.get_data()
         task.write_execution_data()
         return name, data, task
@@ -30,3 +30,7 @@ class BaseProcess(multiprocessing.Process):
         task = self.task('Write Log', data)
         task.write_init_data()
         self.pipe_to_main.send(task)
+
+    @staticmethod
+    def logging_processing(task: Task):
+        print(task.data)
