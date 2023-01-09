@@ -1,4 +1,5 @@
 from ..interface import *
+from scr.config import Config
 import threading
 from scr.processes.base_process import BaseProcess
 import sys
@@ -15,6 +16,7 @@ class UIProcess(BaseProcess):
         self.pipe_to_main = pipe_to_main
         self.pipe_to_parquet = pipe_to_parquet
         self.pipe_to_camera = pipe_to_camera
+        self.config = Config()
 
     def run(self):
         self.create_threading()
@@ -33,17 +35,18 @@ class UIProcess(BaseProcess):
         self.ui, self.app, self.MainWindow = UiMainWindow.create_ui()
         self.MainWindow.show()
         self.t2.start()
-
+        self.create_logging_task(data='UI create')
         sys.exit(self.app.exec_())
 
     def thread_2_task(self):
+        self.create_logging_task(data='UI pipe check')
         while True:
-            if self.pipe_to_camera.poll(timeout=0.1):
+            if self.pipe_to_camera.poll(timeout=self.config.PIPE_TIMEOUT):
                 task = self.pipe_to_camera.recv()
-                task.write_execution_data()
-                name, data = task.get_data()
+                name, data, _ = self.decode_task(task=task)
                 if name == 'Show img':
                     UiMainWindow.update_current_img(data[0], self.ui, self.MainWindow, False)
                     UiMainWindow.update_broke_img(data[1], self.ui, self.MainWindow, True)
             else:
                 pass
+

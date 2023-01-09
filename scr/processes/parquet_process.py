@@ -14,10 +14,10 @@ class ParquetProcess(BaseProcess):
         self.action()
 
     def action(self):
-        self.create_logging_task(data='parquet working create')
+        self.create_logging_task(data='Parquet working create')
 
         while True:
-            if self.pipe_to_camera.poll(timeout=0.1):
+            if self.pipe_to_camera.poll(timeout=self.parquet_worker.config.PIPE_TIMEOUT):
                 task = self.pipe_to_camera.recv()
                 name, data, _ = self.decode_task(task)
                 if name == 'Write to parquet':

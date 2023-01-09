@@ -1,7 +1,6 @@
 class Config:
     # константы системы
-    MAX_QUEUE_SIZE: int = 10
-    PROGRAM_CAMERA_CLOSE: bool = False
+    PIPE_TIMEOUT = 0.1
 
     # константы камеры
     USE_NOTEBOOK_CAMERA: bool = True  # тестовый режим камеры
@@ -34,5 +33,6 @@ class Config:
     EPOCHS: int = 10
 
     # настройки работы с parquet
+    BUFFER_SIZE = 10
     WORKING_DIRECTORY: str = ""
     TITTLE = ['Time', 'Length', 'defect', 'Size', 'Image', 'Defect image']
