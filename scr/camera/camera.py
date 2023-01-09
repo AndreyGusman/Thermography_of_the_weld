@@ -79,12 +79,12 @@ class Camera:
             print('Подключение к камере не установлено.')
 
     @staticmethod
-    def convert_img_to_one_row(con_img: np.array):
-        return np.reshape(con_img, (1, -1))
+    def convert_img_to_one_row(conv_img: np.array):
+        return np.reshape(conv_img, (1, -1))
 
     @staticmethod
-    def convert_img_to_one_column(con_img):
-        return np.reshape(con_img, (-1, 1))
+    def convert_img_to_one_column(conv_img):
+        return np.reshape(conv_img, (-1, 1))
 
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@ from scr.processes.base_process import BaseProcess
 
 
 class ParquetProcess(BaseProcess):
-    def __init__(self, pipe_to_ui,pipe_to_camera, pipe_to_main):
+    def __init__(self, pipe_to_ui, pipe_to_camera, pipe_to_main):
         super().__init__(pipe_to_main)
         self.parquet_worker = ParquetWorker()
         self.pipe_to_main = pipe_to_main

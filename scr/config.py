@@ -1,7 +1,3 @@
-from dataclasses import dataclass
-
-
-@dataclass
 class Config:
     # константы системы
     MAX_QUEUE_SIZE: int = 10
@@ -39,4 +35,4 @@ class Config:
 
     # настройки работы с parquet
     WORKING_DIRECTORY: str = ""
-    TITTLE: list = list['Time', 'Length', 'defect', 'Size', 'Image', 'Defect image']
+    TITTLE = ['Time', 'Length', 'defect', 'Size', 'Image', 'Defect image']

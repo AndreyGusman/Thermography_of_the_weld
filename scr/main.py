@@ -14,8 +14,8 @@ def main():
     ui_process = UIProcess(p_ui_btw_parquet, p_ui_btw_camera, p_ui_btw_main)
     parquet_process = ParquetProcess(p_parquet_btw_ui, p_parquet_btw_camera, p_parquet_btw_main)
 
-    camera_and_nn_process.start()
     ui_process.start()
+    camera_and_nn_process.start()
     parquet_process.start()
 
     camera_and_nn_process.join()
