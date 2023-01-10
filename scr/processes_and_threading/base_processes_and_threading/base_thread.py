@@ -1,0 +1,4 @@
+
+
+class BaseThread:
+    pass

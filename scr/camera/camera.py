@@ -10,7 +10,7 @@ class Camera:
         self.gray_img = None
         self.capture = None
         self.config = Config()
-        self.colormap = plt.get_cmap('inferno')
+        self.colormap = plt.get_cmap('inferno')  # 'inferno'
 
     def get_current_config(self):
         camera_config = {"CAMERA_NAME": self.config.CAMERA_NAME,
@@ -82,7 +82,7 @@ class Camera:
 
     def color_img_to_the_colormap(self, img):
         rgb_img = (self.colormap(img) * 2 ** 8).astype(np.uint8)[:, :, :3]
-        rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
+
         return rgb_img
 
     @staticmethod

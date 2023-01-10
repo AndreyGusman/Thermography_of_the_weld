@@ -489,7 +489,7 @@ class UiMainWindow(object):
     @staticmethod
     def get_pix_map_rgb_ch(img):
         image = QtGui.QImage(img, img.shape[1],
-                             img.shape[0], img.shape[1] * 3, QtGui.QImage.Format.Format_BGR888)
+                             img.shape[0], img.shape[1] * 3, QtGui.QImage.Format.Format_RGB888)
         pix = QtGui.QPixmap(image)
         return pix
 

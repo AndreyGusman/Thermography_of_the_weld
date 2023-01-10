@@ -1,7 +1,7 @@
 from ..interface import *
 from scr.config import Config
 import threading
-from scr.processes.base_process import BaseProcess
+from scr.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
 import sys
 
 
@@ -52,7 +52,7 @@ class UIProcess(BaseProcess):
         self.b_work = False
         self.t2.join()
         self.create_logging_task('Ui pipe worker finish')
-        self.create_logging_task(data='Ui working finish')
+        self.create_logging_task('Ui working finish')
 
     def thread_1_task(self):
         self.ui, self.app, self.MainWindow = UiMainWindow.create_ui()
