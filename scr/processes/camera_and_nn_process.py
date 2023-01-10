@@ -60,9 +60,9 @@ class CameraAndNNProcess(BaseProcess):
     def get_img_from_camera(self):
         ret_img = []
         img = self.camera.get_img()
-        orig_img = self.camera.get_origin_img()
-        ret_img.append(orig_img)
+        color_img = self.camera.color_img_to_the_colormap(img)
         ret_img.append(img)
+        ret_img.append(color_img)
         return ret_img
 
     def create_task_to_write_parquet(self, img_list):
@@ -81,7 +81,8 @@ class CameraAndNNProcess(BaseProcess):
         elif name == 'next task':
             pass
         else:
-            self.create_logging_task(data=f'Camera and NN process task from ui the solution is not defined, task name {name}')
+            self.create_logging_task(
+                data=f'Camera and NN process task from ui the solution is not defined, task name {name}')
 
     def from_main_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
@@ -90,7 +91,8 @@ class CameraAndNNProcess(BaseProcess):
         elif name == 'next task':
             pass
         else:
-            self.create_logging_task(data=f'Camera and NN process task from main the solution is not defined, task name {name}')
+            self.create_logging_task(
+                data=f'Camera and NN process task from main the solution is not defined, task name {name}')
 
     def from_parquet_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
@@ -99,7 +101,8 @@ class CameraAndNNProcess(BaseProcess):
         elif name == 'next task':
             pass
         else:
-            self.create_logging_task(data=f'Camera and NN process task from parquet the solution is not defined, task name {name}')
+            self.create_logging_task(
+                data=f'Camera and NN process task from parquet the solution is not defined, task name {name}')
 
     def default_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
@@ -112,7 +115,6 @@ class CameraAndNNProcess(BaseProcess):
             self.b_work = False
         else:
             self.create_logging_task(data=f'Camera process default task  solution is not defined, task name {name}')
-
 
 
 if __name__ == "__main__":

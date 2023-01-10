@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from scr.config import Config
+import matplotlib.pyplot as plt
 
 
 class Camera:
@@ -9,6 +10,7 @@ class Camera:
         self.gray_img = None
         self.capture = None
         self.config = Config()
+        self.colormap = plt.get_cmap('inferno')
 
     def get_current_config(self):
         camera_config = {"CAMERA_NAME": self.config.CAMERA_NAME,
@@ -78,6 +80,11 @@ class Camera:
         else:
             print('Подключение к камере не установлено.')
 
+    def color_img_to_the_colormap(self, img):
+        rgb_img = (self.colormap(img) * 2 ** 8).astype(np.uint8)[:, :, :3]
+        rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
+        return rgb_img
+
     @staticmethod
     def convert_img_to_one_row(conv_img: np.array):
         return np.reshape(conv_img, (1, -1))
@@ -87,7 +94,7 @@ class Camera:
         return np.reshape(conv_img, (-1, 1))
 
 
-if __name__ == '__main__':
+def test_1():
     test_camera = Camera()
 
     test_camera.get_capture()
@@ -100,3 +107,23 @@ if __name__ == '__main__':
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cv2.destroyAllWindows()
             break
+
+
+def test_2():
+    test_camera = Camera()
+
+    test_camera.get_capture()
+    while True:
+        image = test_camera.get_img()
+        rgb_img = test_camera.color_img_to_the_colormap(image)
+        print(len(image.shape))
+        cv2.imshow('image', image)
+        cv2.imshow('heatmap', rgb_img)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            cv2.destroyAllWindows()
+            break
+
+
+if __name__ == '__main__':
+    test_2()

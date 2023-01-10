@@ -13,8 +13,8 @@ class Config:
 
     ROTATION_ANGLE: int = 0  # поворот изображения (кратно 90!)
 
-    OUT_FRAME_WIDTH: int = 500  # размеры выходного изображения
-    OUT_FRAME_HEIGHT: int = 500
+    OUT_FRAME_WIDTH: int = 640  # размеры выходного изображения
+    OUT_FRAME_HEIGHT: int = 512
 
     CAMERA_ADC: int = 8  # глубина цвета пикселя камеры
 
