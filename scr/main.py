@@ -6,7 +6,9 @@ from scr.config import Config
 class MainProgram:
     def __init__(self):
         self.config = Config()
-        self.b_work = True
+        self.b_work_camera_process = True
+        self.b_work_ui_process = True
+        self.b_work_parquet_process = True
 
     def main(self):
         p_camera_btw_ui, p_ui_btw_camera = multiprocessing.Pipe(duplex=True)
@@ -24,30 +26,40 @@ class MainProgram:
         camera_and_nn_process.start()
         parquet_process.start()
 
-        while self.b_work:
+        while self.b_work_camera_process and self.b_work_ui_process and self.b_work_parquet_process:
             if p_main_btw_ui.poll(timeout=self.config.PIPE_TIMEOUT):
                 task = p_main_btw_ui.recv()
                 if task.name == 'Write Log':
                     print(task.data)
+                elif task.name == 'Close program':
+                    self.b_work_ui_process = False
                 else:
-                    pass
+                    print('ui command not define')
 
             if p_main_btw_parquet.poll(timeout=self.config.PIPE_TIMEOUT):
                 task = p_main_btw_parquet.recv()
                 if task.name == 'Write Log':
                     print(task.data)
+                elif task.name == 'Close program':
+                    self.b_work_parquet_process = False
                 else:
-                    pass
+                    print('parquet command not define')
+
             if p_main_btw_camera.poll(timeout=self.config.PIPE_TIMEOUT):
                 task = p_main_btw_camera.recv()
                 if task.name == 'Write Log':
                     print(task.data)
+                elif task.name == 'Close program':
+                    self.b_work_camera_process = False
                 else:
-                    pass
+                    print('camera command not define')
 
         camera_and_nn_process.join()
+        print('camera close')
         ui_process.join()
+        print('ui close')
         parquet_process.join()
+        print('parquet close')
 
 
 if __name__ == '__main__':
