@@ -2,7 +2,7 @@ from processes_and_threading import *
 import multiprocessing
 from scr.config import Config
 
-
+# TODO переработать цикл работы с Pipe под шаблон базового класса
 class MainProgram:
     def __init__(self):
         self.config = Config()

@@ -49,7 +49,8 @@ class ParquetProcess(BaseProcess):
         elif name == 'next task':
             pass
         else:
-            self.create_logging_task(data=f'Parquet process task from main the solution is not defined, task name {name}')
+            self.create_logging_task(
+                data=f'Parquet process task from main the solution is not defined, task name {name}')
 
     def from_ui_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
@@ -69,7 +70,8 @@ class ParquetProcess(BaseProcess):
         elif name == 'next task':
             pass
         else:
-            self.create_logging_task(data=f'Parquet process task from camera the solution is not defined, task name {name}')
+            self.create_logging_task(
+                data=f'Parquet process task from camera the solution is not defined, task name {name}')
 
     def default_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
@@ -81,7 +83,6 @@ class ParquetProcess(BaseProcess):
             self.b_work = False
         else:
             self.create_logging_task(data=f'Parquet process default task  solution is not defined, task name {name}')
-
 
 
 if __name__ == "__main__":
