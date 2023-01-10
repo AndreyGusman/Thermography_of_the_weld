@@ -6,9 +6,10 @@ from scr.config import Config
 class MainProgram:
     def __init__(self):
         self.config = Config()
-        self.b_work_camera_process = True
-        self.b_work_ui_process = True
-        self.b_work_parquet_process = True
+        self.b_work_camera_process = False
+        self.b_work_ui_process = False
+        self.b_work_parquet_process = False
+        self.b_work = True
 
     def main(self):
         p_camera_btw_ui, p_ui_btw_camera = multiprocessing.Pipe(duplex=True)
@@ -26,33 +27,39 @@ class MainProgram:
         camera_and_nn_process.start()
         parquet_process.start()
 
-        while self.b_work_camera_process and self.b_work_ui_process and self.b_work_parquet_process:
+        while self.b_work or self.b_work_camera_process or self.b_work_ui_process or self.b_work_parquet_process:
             if p_main_btw_ui.poll(timeout=self.config.PIPE_TIMEOUT):
                 task = p_main_btw_ui.recv()
                 if task.name == 'Write Log':
                     print(task.data)
-                elif task.name == 'Close program':
-                    self.b_work_ui_process = False
+                elif task.name == 'Stop module':
+                    self.b_work = False
+                elif task.name == 'Next task':
+                    pass
                 else:
-                    print('ui command not define')
+                    print(f'Main process task from ui, the solution is not defined, task name ')
 
             if p_main_btw_parquet.poll(timeout=self.config.PIPE_TIMEOUT):
                 task = p_main_btw_parquet.recv()
                 if task.name == 'Write Log':
                     print(task.data)
-                elif task.name == 'Close program':
-                    self.b_work_parquet_process = False
+                elif task.name == 'Next task':
+                    pass
                 else:
-                    print('parquet command not define')
+                    print(f'Main process task from parquet, the solution is not defined, task name ')
 
             if p_main_btw_camera.poll(timeout=self.config.PIPE_TIMEOUT):
                 task = p_main_btw_camera.recv()
                 if task.name == 'Write Log':
                     print(task.data)
-                elif task.name == 'Close program':
-                    self.b_work_camera_process = False
+                elif task.name == 'Next task':
+                    pass
                 else:
-                    print('camera command not define')
+                    print(f'Main process task from camera, the solution is not defined, task name ')
+
+            self.b_work_camera_process = camera_and_nn_process.is_alive()
+            self.b_work_ui_process = ui_process.is_alive()
+            self.b_work_parquet_process = parquet_process.is_alive()
 
         camera_and_nn_process.join()
         print('camera close')
@@ -65,3 +72,4 @@ class MainProgram:
 if __name__ == '__main__':
     main = MainProgram()
     main.main()
+    print('main close')
