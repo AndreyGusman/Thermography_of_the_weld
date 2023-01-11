@@ -1,7 +1,7 @@
 from processes_and_threading import *
-from scr.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
+from src.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
 import multiprocessing
-from scr.config import Config
+from src.config import Config
 
 
 # класс наследуется от базового класса, чтобы иметь нативную поддержку работы с Pipe и Task

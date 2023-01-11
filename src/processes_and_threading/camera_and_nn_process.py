@@ -1,5 +1,5 @@
 from ..camera import Camera
-from scr.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
+from src.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
 import time
 import random
 

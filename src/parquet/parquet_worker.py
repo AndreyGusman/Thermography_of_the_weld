@@ -1,6 +1,6 @@
 import time
 
-from scr.config import Config
+from src.config import Config
 
 import pandas as pd
 

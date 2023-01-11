@@ -1,7 +1,7 @@
 import multiprocessing
-from scr.processes_and_threading.base_processes_and_threading.base_task import Task
-from scr.processes_and_threading.base_processes_and_threading.pipe_worker import PipeWorker
-from scr.processes_and_threading.base_processes_and_threading.base_thread import BaseThread
+from src.processes_and_threading.base_processes_and_threading.base_task import Task
+from src.processes_and_threading.base_processes_and_threading.pipe_worker import PipeWorker
+from src.processes_and_threading.base_processes_and_threading.base_thread import BaseThread
 
 
 class BaseProcess(multiprocessing.Process):

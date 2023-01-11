@@ -1,4 +1,4 @@
-import scr.config as config
+import src.config as config
 from camera import *
 from neural_network import *
 

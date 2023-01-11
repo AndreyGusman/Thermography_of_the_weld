@@ -1,6 +1,6 @@
 from ..interface import *
-from scr.config import Config
-from scr.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
+from src.config import Config
+from src.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
 import sys
 
 

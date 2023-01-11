@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from scr.config import Config
+from src.config import Config
 import matplotlib.pyplot as plt
 
 

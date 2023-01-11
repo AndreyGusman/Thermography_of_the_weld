@@ -1,8 +1,8 @@
 import numpy as np
 from tensorflow import keras
-from scr.neural_network.new_neural_model import NewNeuralModel
-from scr.neural_network.fit_model import InterfaceFitModel
-from scr.config import Config
+from src.neural_network.new_neural_model import NewNeuralModel
+from src.neural_network.fit_model import InterfaceFitModel
+from src.config import Config
 
 
 class NeuralNetwork(NewNeuralModel, InterfaceFitModel):
