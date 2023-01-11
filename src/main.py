@@ -95,6 +95,15 @@ class MainProgram(BaseProcess):
         self.thread_work_with_object.join()
         self.thread_work_with_pipe.join()
 
+        self.camera_and_nn_process.join()
+        print('Camera close')
+
+        self.ui_process.join()
+        print('Ui close')
+
+        self.parquet_process.join()
+        print('Parquet close')
+
     def work_with_pipe(self):
         # работа c Pipe пока есть разрешение на работу или каналы не свободны
         while self.b_work or not self.b_pipe_free:
@@ -114,14 +123,12 @@ class MainProgram(BaseProcess):
 
         self.thread_work_with_pipe.start()
 
-        self.camera_and_nn_process.join()
-        print('camera close')
-
-        self.ui_process.join()
-        print('ui close')
-
-        self.parquet_process.join()
-        print('parquet close')
+        while self.b_create_task:
+            self.b_work_camera_process = self.camera_and_nn_process.is_alive()
+            self.b_work_ui_process = self.ui_process.is_alive()
+            self.b_work_parquet_process = self.parquet_process.is_alive()
+            self.b_create_task = self.b_work_camera_process or self.b_work_ui_process or self.b_work_parquet_process
+        print('Main object worker finish')
 
     # обработчики задач
     def from_ui_task_handler(self, task):
@@ -158,7 +165,6 @@ class MainProgram(BaseProcess):
         elif name == 'Start module':
             pass
         elif name == 'Stop module':
-            self.b_create_task = False
             self.b_work = False
         else:
             print(f'Main not the solution is not defined, task name {name}')
@@ -166,6 +172,5 @@ class MainProgram(BaseProcess):
 
 if __name__ == '__main__':
     main = MainProgram()
-    # рабочая функция
     main.action()
     print('main close')

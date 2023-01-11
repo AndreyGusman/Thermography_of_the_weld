@@ -1,8 +1,7 @@
 import time
+import pandas as pd
 
 from src.config import Config
-
-import pandas as pd
 
 
 class ParquetWorker:

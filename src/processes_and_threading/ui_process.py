@@ -2,7 +2,7 @@ from ..interface import *
 from src.config import Config
 from src.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
 import sys
-
+import time
 
 class UIProcess(BaseProcess):
     def __init__(self, pipe_to_parquet, pipe_to_camera, pipe_to_main):
@@ -94,6 +94,7 @@ class UIProcess(BaseProcess):
         if name == 'Show img':
             self.ui.update_current_img(data[0], self.ui, self.MainWindow, False)
             self.ui.update_broke_img(data[1], self.ui, self.MainWindow, True)
+            # self.create_logging_task(data=f'frame update {time.time()}')
         elif name == 'next task':
             pass
         else:
