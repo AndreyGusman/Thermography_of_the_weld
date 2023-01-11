@@ -1,75 +1,171 @@
 from processes_and_threading import *
+from scr.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
 import multiprocessing
 from scr.config import Config
 
-# TODO переработать цикл работы с Pipe под шаблон базового класса
-class MainProgram:
+
+# класс наследуется от базового класса, чтобы иметь нативную поддержку работы с Pipe и Task
+class MainProgram(BaseProcess):
     def __init__(self):
+        super().__init__(None)
+
+        # собственный экземпляр конфигурации
         self.config = Config()
+
+        # объявление  процессов
+        self.parquet_process = None
+        self.ui_process = None
+        self.camera_and_nn_process = None
+
+        # объявление каналов связи
+        self.p_camera_btw_main = None
+        self.p_main_btw_camera = None
+        self.p_parquet_btw_main = None
+        self.p_ui_btw_main = None
+        self.p_main_btw_parquet = None
+        self.p_ui_btw_parquet = None
+        self.p_main_btw_ui = None
+        self.p_parquet_btw_ui = None
+        self.p_parquet_btw_camera = None
+        self.p_camera_btw_parquet = None
+        self.p_ui_btw_camera = None
+        self.p_camera_btw_ui = None
+
+        # инициализация очередей на отправку задач в соответсвующие модули
+        self.queue_to_camera = self.create_queue()
+        self.queue_to_parquet = self.create_queue()
+        self.queue_to_ui = self.create_queue()
+
+        # инициализация работников с каналами связи
+        self.to_ui_pipe_worker = None
+        self.to_parquet_pipe_worker = None
+        self.to_camera_pipe_worker = None
+
+        # инициализация потоков работы с каналами связи и рабочим обьектом
+        self.thread_work_with_object = None
+        self.thread_work_with_pipe = None
+
+        # инициализация переменных контроля работы
+        self.b_work = True
+        self.b_pipe_free = False
+        self.b_create_task = True
         self.b_work_camera_process = False
         self.b_work_ui_process = False
         self.b_work_parquet_process = False
-        self.b_work = True
 
-    def main(self):
-        p_camera_btw_ui, p_ui_btw_camera = multiprocessing.Pipe(duplex=True)
-        p_camera_btw_parquet, p_parquet_btw_camera = multiprocessing.Pipe(duplex=True)
-        p_parquet_btw_ui, p_ui_btw_parquet = multiprocessing.Pipe(duplex=True)
-        p_main_btw_ui, p_ui_btw_main = multiprocessing.Pipe(duplex=True)
-        p_main_btw_parquet, p_parquet_btw_main = multiprocessing.Pipe(duplex=True)
-        p_main_btw_camera, p_camera_btw_main = multiprocessing.Pipe(duplex=True)
+    def init_pipes(self):
+        # инициализация двунаправленных каналов связи
+        self.p_camera_btw_ui, self.p_ui_btw_camera = multiprocessing.Pipe(duplex=True)
+        self.p_camera_btw_parquet, self.p_parquet_btw_camera = multiprocessing.Pipe(duplex=True)
+        self.p_parquet_btw_ui, self.p_ui_btw_parquet = multiprocessing.Pipe(duplex=True)
+        self.p_main_btw_ui, self.p_ui_btw_main = multiprocessing.Pipe(duplex=True)
+        self.p_main_btw_parquet, self.p_parquet_btw_main = multiprocessing.Pipe(duplex=True)
+        self.p_main_btw_camera, self.p_camera_btw_main = multiprocessing.Pipe(duplex=True)
 
-        camera_and_nn_process = CameraAndNNProcess(p_camera_btw_ui, p_camera_btw_parquet, p_camera_btw_main)
-        ui_process = UIProcess(p_ui_btw_parquet, p_ui_btw_camera, p_ui_btw_main)
-        parquet_process = ParquetProcess(p_parquet_btw_ui, p_parquet_btw_camera, p_parquet_btw_main)
+    def init_processes(self):
+        # инициализация процессов
+        self.camera_and_nn_process = CameraAndNNProcess(self.p_camera_btw_ui, self.p_camera_btw_parquet,
+                                                        self.p_camera_btw_main)
+        self.ui_process = UIProcess(self.p_ui_btw_parquet, self.p_ui_btw_camera, self.p_ui_btw_main)
+        self.parquet_process = ParquetProcess(self.p_parquet_btw_ui, self.p_parquet_btw_camera, self.p_parquet_btw_main)
 
-        ui_process.start()
-        camera_and_nn_process.start()
-        parquet_process.start()
+    def start_processes(self):
+        # запуск процессов
+        self.ui_process.start()
+        self.camera_and_nn_process.start()
+        self.parquet_process.start()
 
-        while self.b_work or self.b_work_camera_process or self.b_work_ui_process or self.b_work_parquet_process:
-            if p_main_btw_ui.poll(timeout=self.config.PIPE_TIMEOUT):
-                task = p_main_btw_ui.recv()
-                if task.name == 'Write Log':
-                    print(task.data)
-                elif task.name == 'Stop module':
-                    self.b_work = False
-                elif task.name == 'Next task':
-                    pass
-                else:
-                    print(f'Main process task from ui, the solution is not defined, task name ')
+    def init_pipe_worker(self):
+        # инициализация работников с каналами связи
+        self.to_camera_pipe_worker = self.create_pipe_worker(self.p_main_btw_camera, self.queue_to_camera,
+                                                             self.from_camera_task_handler, self.default_task_handler)
+        self.to_parquet_pipe_worker = self.create_pipe_worker(self.p_main_btw_parquet, self.queue_to_parquet,
+                                                              self.from_parquet_task_handler, self.default_task_handler)
+        self.to_ui_pipe_worker = self.create_pipe_worker(self.p_main_btw_ui, self.queue_to_ui,
+                                                         self.from_ui_task_handler, self.default_task_handler)
 
-            if p_main_btw_parquet.poll(timeout=self.config.PIPE_TIMEOUT):
-                task = p_main_btw_parquet.recv()
-                if task.name == 'Write Log':
-                    print(task.data)
-                elif task.name == 'Next task':
-                    pass
-                else:
-                    print(f'Main process task from parquet, the solution is not defined, task name ')
+    def action(self):
+        # создание потоков нельзя перенести в __init__!
+        self.thread_work_with_object = self.create_thread(self.work_with_object)
+        self.thread_work_with_pipe = self.create_thread(self.work_with_pipe)
+        # запуск потоков, обработчик Pipe запускается из work_with_object
+        self.thread_work_with_object.start()
 
-            if p_main_btw_camera.poll(timeout=self.config.PIPE_TIMEOUT):
-                task = p_main_btw_camera.recv()
-                if task.name == 'Write Log':
-                    print(task.data)
-                elif task.name == 'Next task':
-                    pass
-                else:
-                    print(f'Main process task from camera, the solution is not defined, task name ')
+        # ждём пока заверщится работа
+        self.thread_work_with_object.join()
+        self.thread_work_with_pipe.join()
 
-            self.b_work_camera_process = camera_and_nn_process.is_alive()
-            self.b_work_ui_process = ui_process.is_alive()
-            self.b_work_parquet_process = parquet_process.is_alive()
+    def work_with_pipe(self):
+        # работа c Pipe пока есть разрешение на работу или каналы не свободны
+        while self.b_work or not self.b_pipe_free:
+            b_pipe_to_camera_free = self.to_camera_pipe_worker.work(timeout=self.config.PIPE_TIMEOUT,
+                                                                    received_limit=self.config.TRY_SEND_RECEIVE_LIMIT)
+            b_pipe_to_ui_free = self.to_ui_pipe_worker.work(timeout=self.config.PIPE_TIMEOUT,
+                                                            received_limit=self.config.TRY_SEND_RECEIVE_LIMIT)
+            b_pipe_to_parquet_free = self.to_parquet_pipe_worker.work(timeout=self.config.PIPE_TIMEOUT,
+                                                                      received_limit=self.config.TRY_SEND_RECEIVE_LIMIT)
+            self.b_pipe_free = self.check_pipe_free(b_pipe_to_camera_free, b_pipe_to_ui_free, b_pipe_to_parquet_free)
 
-        camera_and_nn_process.join()
+    def work_with_object(self):
+        self.init_pipes()
+        self.init_processes()
+        self.start_processes()
+        self.init_pipe_worker()
+
+        self.thread_work_with_pipe.start()
+
+        self.camera_and_nn_process.join()
         print('camera close')
-        ui_process.join()
+
+        self.ui_process.join()
         print('ui close')
-        parquet_process.join()
+
+        self.parquet_process.join()
         print('parquet close')
+
+    # обработчики задач
+    def from_ui_task_handler(self, task):
+        name, data, decode_task = self.decode_task(task)
+        if task.name == 'Write Log':
+            print(task.data)
+        elif name == 'next task':
+            pass
+        else:
+            pass
+
+    def from_parquet_task_handler(self, task):
+        name, data, decode_task = self.decode_task(task)
+        if task.name == 'Write Log':
+            print(task.data)
+        elif name == 'next task':
+            pass
+        else:
+            pass
+
+    def from_camera_task_handler(self, task):
+        name, data, decode_task = self.decode_task(task)
+        if task.name == 'Write Log':
+            print(task.data)
+        elif name == 'next task':
+            pass
+        else:
+            pass
+
+    def default_task_handler(self, task):
+        name, data, decode_task = self.decode_task(task)
+        if name == 'Update config':
+            self.config = data
+        elif name == 'Start module':
+            pass
+        elif name == 'Stop module':
+            self.b_create_task = False
+            self.b_work = False
+        else:
+            print(f'Main not the solution is not defined, task name {name}')
 
 
 if __name__ == '__main__':
     main = MainProgram()
-    main.main()
+    # рабочая функция
+    main.action()
     print('main close')

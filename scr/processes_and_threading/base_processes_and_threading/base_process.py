@@ -1,7 +1,7 @@
 import multiprocessing
 from scr.processes_and_threading.base_processes_and_threading.base_task import Task
-from scr.config import Config
 from scr.processes_and_threading.base_processes_and_threading.pipe_worker import PipeWorker
+from scr.processes_and_threading.base_processes_and_threading.base_thread import BaseThread
 
 
 class BaseProcess(multiprocessing.Process):
@@ -9,7 +9,6 @@ class BaseProcess(multiprocessing.Process):
         multiprocessing.Process.__init__(self)
         self.pipe_to_main = pipe_to_main
         self.task = Task
-        self.config = Config()
 
     def run(self):
         pass
@@ -58,4 +57,6 @@ class BaseProcess(multiprocessing.Process):
         else:
             return False
 
-
+    @staticmethod
+    def create_thread(work):
+        return BaseThread(work)
