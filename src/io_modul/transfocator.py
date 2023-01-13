@@ -43,7 +43,7 @@ class TransfocatorCamera:
             # write to multiple registers using list of data
             # wr = client.write_registers(1000,list,unit=1)
             print(wr)
-            time.sleep(0.1)
+
 
 
 if __name__ == '__main__':

@@ -52,7 +52,7 @@ class Profibus:
             # FUNCTIE 10 - (Write register) (Start address to read from=14, List of booleans to write, Modbus slave unit ID)
             # write to multiple registers using list of data
             # wr = client.write_registers(1000,list,unit=1)
-            time.sleep(0.1)
+
 
 if __name__ == '__main__':
    Profibus().read()
