@@ -2,10 +2,6 @@ from pymodbus.client.sync import ModbusTcpClient
 import time
 from src.config import Config
 
-
-
-setup = {'ID': '192.168.1.105', 'SlaveID': None, 'Port': None, 'lengthRead': None, 'lengthWrite': None}
-
 toPLC = {'W_Live_Bit': None, 'W_Emergency_Stop': None, 'W_Defect_bool': None, 'W_spare_04': None, 'W_spare_05': None,
          'W_spare_06': None, 'W_spare_07': None, 'W_spare_08': None, 'W_spare_09': None, 'W_spare_10': None,
          'W_spare_11': None, 'W_spare_12': None, 'W_spare_13': None, 'W_spare_14': None, 'W_spare_15': None,
@@ -59,7 +55,8 @@ class Profibus:
             time.sleep(0.1)
 
 if __name__ == '__main__':
-    test = Profibus().read(), Profibus.write(toPLC)
+   Profibus().read()
+   Profibus.write(toPLC)
 
 
 
