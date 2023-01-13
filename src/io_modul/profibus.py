@@ -33,7 +33,7 @@ class Profibus:
             rr = client.read_holding_registers(1000, lengthRead, unit=self.config.PROFIBUS_SLAVE)
             # FUNCTIE 03 - Read register (Start address to read from=0, length=64, Modbus slave ID)
             print(rr.registers)
-            time.sleep(0.5)
+
 
     def write(self, toPLC):
         self.toPLC = toPLC
