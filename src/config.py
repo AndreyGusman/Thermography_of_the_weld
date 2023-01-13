@@ -1,7 +1,7 @@
 class Config:
     # константы системы
-    PIPE_TIMEOUT = 0.01
-    TRY_SEND_RECEIVE_LIMIT = 10
+    PIPE_TIMEOUT = 0.0001
+    SEND_RECEIVE_TIME_LIMIT = 1
 
     # константы камеры
     USE_NOTEBOOK_CAMERA: bool = True  # тестовый режим камеры

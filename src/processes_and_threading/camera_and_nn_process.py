@@ -59,12 +59,9 @@ class CameraAndNNProcess(BaseProcess):
     def work_with_pipe(self):
         # работа c Pipe пока есть разрешение на работу или каналы не свободны
         while self.b_work or not self.b_pipe_free:
-            b_pipe_to_main_free = self.to_main_pipe_worker.work(timeout=self.camera.config.PIPE_TIMEOUT,
-                                                                received_limit=self.camera.config.TRY_SEND_RECEIVE_LIMIT)
-            b_pipe_to_ui_free = self.to_ui_pipe_worker.work(timeout=self.camera.config.PIPE_TIMEOUT,
-                                                            received_limit=self.camera.config.TRY_SEND_RECEIVE_LIMIT)
-            b_pipe_to_parquet_free = self.to_parquet_pipe_worker.work(timeout=self.camera.config.PIPE_TIMEOUT,
-                                                                      received_limit=self.camera.config.TRY_SEND_RECEIVE_LIMIT)
+            b_pipe_to_main_free = self.to_main_pipe_worker.work()
+            b_pipe_to_ui_free = self.to_ui_pipe_worker.work()
+            b_pipe_to_parquet_free = self.to_parquet_pipe_worker.work()
             self.b_pipe_free = self.check_pipe_free(b_pipe_to_main_free, b_pipe_to_ui_free, b_pipe_to_parquet_free)
 
     def work_with_object(self):
@@ -77,6 +74,7 @@ class CameraAndNNProcess(BaseProcess):
             self.create_task(name='Show img', data=list_img, queue=self.queue_to_ui)
             self.create_task(name='Write to parquet', data=self.create_task_to_write_parquet(list_img),
                              queue=self.queue_to_parquet)
+
         self.create_logging_task(data='Camera stopped')
         # освобождаем камеру
         self.camera.capture.release()

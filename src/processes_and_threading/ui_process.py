@@ -4,6 +4,7 @@ from src.processes_and_threading.base_processes_and_threading.base_process impor
 import sys
 import time
 
+
 class UIProcess(BaseProcess):
     def __init__(self, pipe_to_parquet, pipe_to_camera, pipe_to_main):
         super().__init__(pipe_to_main)
@@ -79,12 +80,9 @@ class UIProcess(BaseProcess):
 
         while self.b_work or not self.b_pipe_free:
             # возможно константы из конфига будут подтягиваться при инициализации и будут неизменными
-            b_pipe_to_main_free = self.to_main_pipe_worker.work(timeout=self.config.PIPE_TIMEOUT,
-                                                                received_limit=self.config.TRY_SEND_RECEIVE_LIMIT)
-            b_pipe_to_camera_free = self.to_camera_pipe_worker.work(timeout=self.config.PIPE_TIMEOUT,
-                                                                    received_limit=self.config.TRY_SEND_RECEIVE_LIMIT)
-            b_pipe_to_parquet_free = self.to_parquet_pipe_worker.work(timeout=self.config.PIPE_TIMEOUT,
-                                                                      received_limit=self.config.TRY_SEND_RECEIVE_LIMIT)
+            b_pipe_to_main_free = self.to_main_pipe_worker.work()
+            b_pipe_to_camera_free = self.to_camera_pipe_worker.work()
+            b_pipe_to_parquet_free = self.to_parquet_pipe_worker.work()
 
             self.b_pipe_free = self.check_pipe_free(b_pipe_to_main_free, b_pipe_to_camera_free, b_pipe_to_parquet_free)
 

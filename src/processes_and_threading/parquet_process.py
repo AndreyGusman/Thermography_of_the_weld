@@ -59,12 +59,9 @@ class ParquetProcess(BaseProcess):
     def work_with_pipe(self):
         # работа c Pipe пока есть разрешение на работу или каналы не свободны
         while self.b_work or not self.b_pipe_free:
-            b_pipe_to_main_free = self.to_main_pipe_worker.work(timeout=self.parquet_worker.config.PIPE_TIMEOUT,
-                                                                received_limit=self.parquet_worker.config.TRY_SEND_RECEIVE_LIMIT)
-            b_pipe_to_ui_free = self.to_ui_pipe_worker.work(timeout=self.parquet_worker.config.PIPE_TIMEOUT,
-                                                            received_limit=self.parquet_worker.config.TRY_SEND_RECEIVE_LIMIT)
-            b_pipe_to_camera_free = self.to_camera_pipe_worker.work(timeout=self.parquet_worker.config.PIPE_TIMEOUT,
-                                                                    received_limit=self.parquet_worker.config.TRY_SEND_RECEIVE_LIMIT)
+            b_pipe_to_main_free = self.to_main_pipe_worker.work()
+            b_pipe_to_ui_free = self.to_ui_pipe_worker.work()
+            b_pipe_to_camera_free = self.to_camera_pipe_worker.work()
 
             self.b_pipe_free = self.check_pipe_free(b_pipe_to_main_free, b_pipe_to_ui_free, b_pipe_to_camera_free)
 
