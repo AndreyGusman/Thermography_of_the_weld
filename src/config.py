@@ -37,3 +37,14 @@ class Config:
     BUFFER_SIZE = 150
     WORKING_DIRECTORY: str = ""
     TITTLE = ['Time', 'Length', 'defect', 'Size', 'Image', 'Defect image']
+
+    # настройки трансфокатора
+    TRANSFOCATOR_HOST: str = "192.168.0.1"
+    TRANSFOCATOR_SLAVE: int = 1
+    TRANSFOCATOR_PORT: int = 502
+
+    # настройки трансфокатора
+    PROFIBUS_HOST: str = "192.168.0.2"
+    PROFIBUS_SLAVE: int = 1
+    PROFIBUS_PORT: int = 502
+
