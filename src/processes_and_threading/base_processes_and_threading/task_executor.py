@@ -22,6 +22,7 @@ class TaskExecutor:
         self.default_task_handler = default_task_handler
 
         self.send_recv_time_limit = Config.SEND_RECEIVE_TIME_LIMIT
+        self.timeout = Config.PIPE_TIMEOUT
 
         self.time_last_recv = time.time()
 
@@ -31,9 +32,11 @@ class TaskExecutor:
         считываем её с очереди. Если задача находится в списке стандартных вызывается обработчик стадндартных
         задач, иначе вызывает обработчик задач от модуля, указанный при инициализации. в любом случае обновляем время
         последнего получения задачи.
+        time.sleep(self.timeout) необходима для уменьшения колличества вызовов фунции и уменьшения нагрузки на процессор
         Args:
         :return: результат метода self.watch_received_limit()(см. описание метода)
         """
+        time.sleep(self.timeout)
         if not self.queue_for_execution.empty():
             recv_task = self.queue_for_execution.get()
             if recv_task.name in self.default_task_name:
