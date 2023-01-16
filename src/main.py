@@ -2,7 +2,7 @@ from processes_and_threading import *
 from src.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
 import multiprocessing
 from src.config import Config
-import time
+
 
 # класс наследуется от базового класса, чтобы иметь нативную поддержку работы с Pipe и Task
 class MainProgram(BaseProcess):
@@ -61,7 +61,6 @@ class MainProgram(BaseProcess):
         self.p_main_btw_ui, self.p_ui_btw_main = multiprocessing.Pipe(duplex=True)
         self.p_main_btw_parquet, self.p_parquet_btw_main = multiprocessing.Pipe(duplex=True)
         self.p_main_btw_camera, self.p_camera_btw_main = multiprocessing.Pipe(duplex=True)
-
 
     def init_processes(self):
         # инициализация процессов
@@ -174,4 +173,3 @@ if __name__ == '__main__':
     main = MainProgram()
     main.action()
     print('main close')
-
