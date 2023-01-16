@@ -2,6 +2,7 @@ import multiprocessing
 from src.processes_and_threading.base_processes_and_threading.base_task import Task
 from src.processes_and_threading.base_processes_and_threading.pipe_worker import PipeWorker
 from src.processes_and_threading.base_processes_and_threading.base_thread import BaseThread
+from src.processes_and_threading.base_processes_and_threading.task_executor import TaskExecutor
 
 
 class BaseProcess(multiprocessing.Process):
@@ -88,16 +89,26 @@ class BaseProcess(multiprocessing.Process):
         print(task.data)
 
     @staticmethod
-    def create_pipe_worker(pipe_connection, queue_task, task_handler, default_task_handler):
+    def create_pipe_worker(pipe_connection, queue_for_sending, queue_for_execution):
         """
         Метод создающий рабочего с объектом multiprocessing.connection.Connection
         Args:pipe_connection - объект multiprocessing.connection.Connection
-             queue_task - объект очереди на отправку задач
-             task_handler - ссылка на функцию обработки задач от соответсвующего модуля программы
-             default_task_handler  - ссылка на функцию обработки стандартных задач
+             queue_for_sending - объект очереди на отправку задач
+             queue_for_execution - объект очереди на выполнение задач
         :return: экземпляр класса PipeWorker
         """
-        return PipeWorker(pipe_connection, queue_task, task_handler, default_task_handler)
+        return PipeWorker(pipe_connection, queue_for_sending, queue_for_execution)
+
+    @staticmethod
+    def create_task_executor(queue_for_execution, task_handler, default_task_handler):
+        """
+        Метод создающий исполнителя задач
+        Args:queue_for_execution - очередь на выполнение задач, экземпляр класс multiprocessing.Queue
+             task_handler - ссылка на функцию обработки задач от соответсвующего модуля программы
+             default_task_handler  - ссылка на функцию обработки стандартных задач
+        :return: экземпляр класса TaskExecutor
+        """
+        return TaskExecutor(queue_for_execution, task_handler, default_task_handler)
 
     @staticmethod
     def create_queue():

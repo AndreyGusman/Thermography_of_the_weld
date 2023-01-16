@@ -18,7 +18,6 @@ class ParquetWorker:
             df = pd.DataFrame([self.data_buf[0]], columns=title)
             for i in range(1, len(self.data_buf)):
                 df.loc[len(df.index)] = self.data_buf[i]
-
             df.to_parquet(path=f"{self.config.WORKING_DIRECTORY}{parquet_file_path}{parquet_file_name}")
             self.data_buf.clear()
             return f'parquet writer need {time.time() - start_time}s for {self.config.BUFFER_SIZE} img'
