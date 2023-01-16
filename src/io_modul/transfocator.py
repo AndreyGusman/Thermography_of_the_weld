@@ -1,16 +1,17 @@
 from pymodbus.client.sync import ModbusTcpClient
-import time
+# import time
 from src.config import Config
 
-toTransfocator = {'Zoom+': None, 'Zoom-': None, 'SetZoom': None, 'Focus+': None, 'Focus-': None, 'SetFocus': None,
-                  'DiagOFF': None, 'DiagON': None}
+toCamera = {'Zoom+': None, 'Zoom-': None, 'SetZoom': None, 'Focus+': None, 'Focus-': None, 'SetFocus': None,
+            'DiagOFF': None, 'DiagON': None}
 
-fromTransfocator = {'ReqActualZoom+': None, 'ReqActualZoom-': None, 'ReqActualFocus+': None, 'ReqActualFocus-': None}
+fromCamera = {'ReqActualZoom+': None, 'ReqActualZoom-': None, 'ReqActualFocus+': None, 'ReqActualFocus-': None}
 
 
-class TransfocatorCamera:
+class SettingCamera:
 
     def __init__(self):
+        self.send = None
         self.config = Config()
 
     def read(self):
@@ -45,6 +46,5 @@ class TransfocatorCamera:
             print(wr)
 
 
-
 if __name__ == '__main__':
-    test = TransfocatorCamera().read(), TransfocatorCamera().write(toTransfocator)
+    test = SettingCamera().read(), SettingCamera().write(toCamera)
