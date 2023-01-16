@@ -1,6 +1,6 @@
 class Config:
     # константы системы
-    PIPE_TIMEOUT = 0.0001
+    PIPE_TIMEOUT = 0.001
     SEND_RECEIVE_TIME_LIMIT = 1
 
     # константы камеры
@@ -34,6 +34,6 @@ class Config:
     EPOCHS: int = 10
 
     # настройки работы с parquet
-    BUFFER_SIZE = 10
+    BUFFER_SIZE = 150
     WORKING_DIRECTORY: str = ""
     TITTLE = ['Time', 'Length', 'defect', 'Size', 'Image', 'Defect image']

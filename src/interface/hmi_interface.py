@@ -465,7 +465,6 @@ class UiMainWindow(object):
             main_window.update()
 
     def update_current_img(self, img, interface, main_window, update):
-
         pix = self.get_pix_map(img)
         interface.l_Current_img.setPixmap(pix)
         if update:

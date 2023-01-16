@@ -71,6 +71,7 @@ class MainProgram(BaseProcess):
         self.parquet_process = ParquetProcess(self.p_parquet_btw_ui, self.p_parquet_btw_camera, self.p_parquet_btw_main)
 
     def start_processes(self):
+
         # запуск процессов
         self.ui_process.start()
         self.camera_and_nn_process.start()
@@ -169,14 +170,8 @@ class MainProgram(BaseProcess):
 
 
 if __name__ == '__main__':
+    multiprocessing.set_start_method("spawn")
     main = MainProgram()
     main.action()
     print('main close')
-    # tmp2 = 0
-    # start = time.time_ns()
-    # for _ in range(10**4):
-    #     tmp1 = time.time()
-    #     tmp2 = tmp1 -time.time()
-    #     if tmp2 > 1 :
-    #         pass
-    # print(time.time_ns()-start)
+
