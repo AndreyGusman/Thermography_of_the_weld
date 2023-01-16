@@ -19,21 +19,36 @@ class ParquetProcess(BaseProcess):
         self.queue_to_ui = self.create_queue()
         self.queue_to_camera = self.create_queue()
 
+        # инициализация очередей на выполнение задач от  соответсвующего модуля
+        self.queue_from_main = self.create_queue()
+        self.queue_from_camera = self.create_queue()
+        self.queue_from_ui = self.create_queue()
+
         # инициализация работников с каналами связи
         self.to_main_pipe_worker = self.create_pipe_worker(self.pipe_to_main, self.queue_to_main,
-                                                           self.from_main_task_handler, self.default_task_handler)
-        self.to_ui_pipe_worker = self.create_pipe_worker(self.pipe_to_ui, self.queue_to_ui, self.from_ui_task_handler,
-                                                         self.default_task_handler)
+                                                           self.queue_from_main)
+        self.to_ui_pipe_worker = self.create_pipe_worker(self.pipe_to_ui, self.queue_to_ui, self.queue_from_ui)
         self.to_camera_pipe_worker = self.create_pipe_worker(self.pipe_to_camera, self.queue_to_camera,
-                                                             self.from_camera_task_handler, self.default_task_handler)
+                                                             self.queue_from_camera)
+
+        # инициализация исполнителей задач с каналами связи
+        self.from_main_task_executor = self.create_task_executor(self.queue_from_main, self.from_main_task_handler,
+                                                                 self.default_task_handler)
+        self.from_camera_task_executor = self.create_task_executor(self.queue_from_camera,
+                                                                   self.from_camera_task_handler,
+                                                                   self.default_task_handler)
+        self.from_ui_task_executor = self.create_task_executor(self.queue_from_ui, self.from_ui_task_handler,
+                                                               self.default_task_handler)
 
         # инициализация потоков работы с каналами связи и рабочим обьектом
         self.thread_work_with_object = None
         self.thread_work_with_pipe = None
+        self.thread_work_with_task = None
 
         # инициализация переменных контроля работы
         self.b_work = True
         self.b_pipe_free = False
+        self.b_queue_free = False
         self.b_create_task = True
 
     def run(self):
@@ -44,16 +59,18 @@ class ParquetProcess(BaseProcess):
         # создание потоков нельзя перенести в __init__!
         self.thread_work_with_object = self.create_thread(self.work_with_object)
         self.thread_work_with_pipe = self.create_thread(self.work_with_pipe)
-
+        self.thread_work_with_task = self.create_thread(self.work_with_task)
         # запуск потоков
         self.thread_work_with_object.start()
         self.thread_work_with_pipe.start()
+        self.thread_work_with_task.start()
 
         self.create_logging_task(data='Parquet working create')
 
         # ждём пока заверщится работа
         self.thread_work_with_object.join()
         self.thread_work_with_pipe.join()
+        self.thread_work_with_task.join()
 
     # задача потока работы с каналами связи
     def work_with_pipe(self):
@@ -68,6 +85,15 @@ class ParquetProcess(BaseProcess):
     def work_with_object(self):
         # пока задач не создаёт, только исполняет
         pass
+
+    # задача потока работы с задачами
+    def work_with_task(self):
+        while self.b_work or not self.b_pipe_free or not self.b_queue_free:
+            b_queue_from_main_free = self.from_main_task_executor.work()
+            b_queue_from_ui_free = self.from_ui_task_executor.work()
+            b_queue_from_parquet_free = self.from_camera_task_executor.work()
+            self.b_queue_free = self.check_pipe_free(b_queue_from_main_free, b_queue_from_ui_free,
+                                                     b_queue_from_parquet_free)
 
     # обработчики задач
     def from_main_task_handler(self, task):
