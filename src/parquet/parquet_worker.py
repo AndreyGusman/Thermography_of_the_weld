@@ -27,3 +27,7 @@ class ParquetWorker:
                                    parquet_file_name: str = 'db.parquet'):
         df = pd.DataFrame(data)
         df.to_parquet(f"{self.config.WORKING_DIRECTORY}{parquet_file_path}{parquet_file_name}")
+
+
+if __name__ == '__main__':
+    pass

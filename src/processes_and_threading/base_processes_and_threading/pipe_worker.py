@@ -1,5 +1,5 @@
 import time
-from config import Config
+from src.config import Config
 
 
 class PipeWorker:
@@ -60,3 +60,7 @@ class PipeWorker:
             return True
         else:
             return False
+
+
+if __name__ == '__main__':
+    pass

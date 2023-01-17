@@ -155,3 +155,7 @@ class UIProcess(BaseProcess):
             self.b_work = False
         else:
             self.create_logging_task(data=f'Ui process default task  solution is not defined, task name {name}')
+
+
+if __name__ == '__main__':
+    pass

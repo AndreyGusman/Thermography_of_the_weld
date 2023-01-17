@@ -1,4 +1,4 @@
-from config import Config
+from src.config import Config
 import time
 
 
@@ -57,3 +57,7 @@ class TaskExecutor:
             return True
         else:
             return False
+
+
+if __name__ == '__main__':
+    pass

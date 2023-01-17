@@ -1,4 +1,4 @@
-from pymodbus.client.sync import ModbusTcpClient
+from pymodbus.client.tcp import ModbusTcpClient
 # import time
 from src.config import Config
 

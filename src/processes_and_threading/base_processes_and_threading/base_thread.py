@@ -8,6 +8,7 @@ class BaseThread(threading.Thread):
         Args: work - целевая функция потока
 
     """
+
     def __init__(self, work):
         threading.Thread.__init__(self)
         self.work = work
@@ -25,3 +26,7 @@ class BaseThread(threading.Thread):
         :return: None
         """
         self.work()
+
+
+if __name__ == '__main__':
+    pass

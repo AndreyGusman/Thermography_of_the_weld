@@ -140,3 +140,7 @@ class BaseProcess(multiprocessing.Process):
         :return: объект экземпляра класса BaseThread() с целевой функцией work
         """
         return BaseThread(work)
+
+
+if __name__ == '__main__':
+    pass

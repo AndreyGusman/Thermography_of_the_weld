@@ -4,10 +4,6 @@ import time
 import random
 
 
-if __name__ == "__main__":
-    pass
-
-
 class CameraAndNNProcess(BaseProcess):
     def __init__(self, pipe_to_ui, pipe_to_parquet, pipe_to_main):
         super().__init__(pipe_to_main)
@@ -175,3 +171,7 @@ class CameraAndNNProcess(BaseProcess):
             self.b_work = False
         else:
             self.create_logging_task(data=f'Camera process default task  solution is not defined, task name {name}')
+
+
+if __name__ == "__main__":
+    pass

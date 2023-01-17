@@ -1,4 +1,4 @@
-from processes_and_threading import *
+from src.processes_and_threading import CameraAndNNProcess, ParquetProcess, UIProcess
 from src.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
 import multiprocessing
 from src.config import Config
@@ -205,8 +205,11 @@ class MainProgram(BaseProcess):
             print(f'Main not the solution is not defined, task name {name}')
 
 
-if __name__ == '__main__':
-    multiprocessing.set_start_method("spawn")
+def main():
     main = MainProgram()
     main.action()
     print('main close')
+
+
+if __name__ == '__main__':
+    main()
