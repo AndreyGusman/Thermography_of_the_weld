@@ -21,8 +21,8 @@ class SettingCamera:
 
         while True:
             client.connect()
-            rr = client.read_holding_registers(1000, length_read, unit=self.config.TRANSFOCATOR_SLAVE)
-            # FUNCTIE 03 - Read register (Start address to read from=0, length=64, Modbus slave ID)
+            rr = client.read_holding_registers(0, length_read, unit=self.config.TRANSFOCATOR_SLAVE)
+            # Start address to read from=0, length=64, Modbus slave ID
             print(rr.registers)
             return rr.registers
 
@@ -38,13 +38,11 @@ class SettingCamera:
             #     for i in range(10):
             #         data = random.randint(25,35)
             #         list.append(data)
-            wr = client.write_registers(14, list, unit=self.config.TRANSFOCATOR_SLAVE)
-            # FUNCTIE 10 - (Write register) (Start address to read from=14, List of booleans to write,
-            # Modbus slave unit ID)
-            # write to multiple registers using list of data
-            # wr = client.write_registers(1000,list,unit=1)
+            wr = client.write_registers(14, dict, unit=self.config.TRANSFOCATOR_SLAVE)
+            # Start address to read from=14, dict to write, Modbus slave unit ID
+
             print(wr)
 
 
 if __name__ == '__main__':
-    test = SettingCamera().read(), SettingCamera().write(toCamera)
+    test = SettingCamera().read()
