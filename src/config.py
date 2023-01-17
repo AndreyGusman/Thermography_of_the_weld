@@ -1,7 +1,7 @@
 class Config:
     # константы системы
-    PIPE_TIMEOUT = 0.01
-    TRY_SEND_RECEIVE_LIMIT = 10
+    PIPE_TIMEOUT = 0.001
+    SEND_RECEIVE_TIME_LIMIT = 1
 
     # константы камеры
     USE_NOTEBOOK_CAMERA: bool = True  # тестовый режим камеры
@@ -34,17 +34,16 @@ class Config:
     EPOCHS: int = 10
 
     # настройки работы с parquet
-    BUFFER_SIZE = 10
+    BUFFER_SIZE = 150
     WORKING_DIRECTORY: str = ""
     TITTLE = ['Time', 'Length', 'defect', 'Size', 'Image', 'Defect image']
 
     # настройки трансфокатора
-    TRANSFOCATOR_HOST: str = "192.168.0.1"
+    TRANSFOCATOR_HOST: str = "192.168.0.100"
     TRANSFOCATOR_SLAVE: int = 1
     TRANSFOCATOR_PORT: int = 502
 
     # настройки трансфокатора
-    PROFIBUS_HOST: str = "192.168.0.2"
+    PROFIBUS_HOST: str = "192.168.0.100"
     PROFIBUS_SLAVE: int = 1
     PROFIBUS_PORT: int = 502
-

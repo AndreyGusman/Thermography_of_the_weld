@@ -1,4 +1,7 @@
+
 from pymodbus.client.sync import ModbusTcpClient
+
+
 from src.config import Config
 
 sendPLC = {'W_Live_Bit': None, 'W_Emergency_Stop': None, 'W_Defect_bool': None, 'W_spare_04': None, 'W_spare_05': None,

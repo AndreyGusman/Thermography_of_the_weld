@@ -21,21 +21,37 @@ class CameraAndNNProcess(BaseProcess):
         self.queue_to_parquet = self.create_queue()
         self.queue_to_ui = self.create_queue()
 
+        # инициализация очередей на выполнение задач от  соответсвующего модуля
+        self.queue_from_main = self.create_queue()
+        self.queue_from_parquet = self.create_queue()
+        self.queue_from_ui = self.create_queue()
+
         # инициализация работников с каналами связи
         self.to_main_pipe_worker = self.create_pipe_worker(self.pipe_to_main, self.queue_to_main,
-                                                           self.from_main_task_handler, self.default_task_handler)
+                                                           self.queue_from_main)
         self.to_parquet_pipe_worker = self.create_pipe_worker(self.pipe_to_parquet, self.queue_to_parquet,
-                                                              self.from_parquet_task_handler, self.default_task_handler)
+                                                              self.queue_from_parquet)
         self.to_ui_pipe_worker = self.create_pipe_worker(self.pipe_to_ui, self.queue_to_ui,
-                                                         self.from_ui_task_handler, self.default_task_handler)
+                                                         self.queue_from_ui)
+
+        # инициализация исполнителей задач с каналами связи
+        self.from_main_task_executor = self.create_task_executor(self.queue_from_main, self.from_main_task_handler,
+                                                                 self.default_task_handler)
+        self.from_parquet_task_executor = self.create_task_executor(self.queue_from_parquet,
+                                                                    self.from_parquet_task_handler,
+                                                                    self.default_task_handler)
+        self.from_ui_task_executor = self.create_task_executor(self.queue_from_ui, self.from_ui_task_handler,
+                                                               self.default_task_handler)
 
         # инициализация потоков работы с каналами связи и рабочим обьектом
         self.thread_work_with_object = None
         self.thread_work_with_pipe = None
+        self.thread_work_with_task = None
 
         # инициализация переменных контроля работы
         self.b_work = True
         self.b_pipe_free = False
+        self.b_queue_free = False
         self.b_create_task = True
 
     # метод выполняемый при старте процесса
@@ -48,25 +64,28 @@ class CameraAndNNProcess(BaseProcess):
         # создание потоков нельзя перенести в __init__!
         self.thread_work_with_object = self.create_thread(self.work_with_object)
         self.thread_work_with_pipe = self.create_thread(self.work_with_pipe)
+        self.thread_work_with_task = self.create_thread(self.work_with_task)
+
         # запуск потоков
         self.thread_work_with_object.start()
         self.thread_work_with_pipe.start()
+        self.thread_work_with_task.start()
+
         # ждём пока заверщится работа
         self.thread_work_with_object.join()
         self.thread_work_with_pipe.join()
+        self.thread_work_with_task.join()
 
     # задача потока работы с каналами связи
     def work_with_pipe(self):
         # работа c Pipe пока есть разрешение на работу или каналы не свободны
         while self.b_work or not self.b_pipe_free:
-            b_pipe_to_main_free = self.to_main_pipe_worker.work(timeout=self.camera.config.PIPE_TIMEOUT,
-                                                                received_limit=self.camera.config.TRY_SEND_RECEIVE_LIMIT)
-            b_pipe_to_ui_free = self.to_ui_pipe_worker.work(timeout=self.camera.config.PIPE_TIMEOUT,
-                                                            received_limit=self.camera.config.TRY_SEND_RECEIVE_LIMIT)
-            b_pipe_to_parquet_free = self.to_parquet_pipe_worker.work(timeout=self.camera.config.PIPE_TIMEOUT,
-                                                                      received_limit=self.camera.config.TRY_SEND_RECEIVE_LIMIT)
+            b_pipe_to_main_free = self.to_main_pipe_worker.work()
+            b_pipe_to_ui_free = self.to_ui_pipe_worker.work()
+            b_pipe_to_parquet_free = self.to_parquet_pipe_worker.work()
             self.b_pipe_free = self.check_pipe_free(b_pipe_to_main_free, b_pipe_to_ui_free, b_pipe_to_parquet_free)
 
+    # задача потока работы с объектом
     def work_with_object(self):
         # захватываем изображение с камеры
         self.camera.get_capture()
@@ -77,10 +96,20 @@ class CameraAndNNProcess(BaseProcess):
             self.create_task(name='Show img', data=list_img, queue=self.queue_to_ui)
             self.create_task(name='Write to parquet', data=self.create_task_to_write_parquet(list_img),
                              queue=self.queue_to_parquet)
+
         self.create_logging_task(data='Camera stopped')
         # освобождаем камеру
         self.camera.capture.release()
         self.create_logging_task(data='Camera capture closed')
+
+    # задача потока работы с задачами
+    def work_with_task(self):
+        while self.b_work or not self.b_pipe_free or not self.b_queue_free:
+            b_queue_from_main_free = self.from_main_task_executor.work()
+            b_queue_from_ui_free = self.from_ui_task_executor.work()
+            b_queue_from_parquet_free = self.from_parquet_task_executor.work()
+            self.b_queue_free = self.check_pipe_free(b_queue_from_main_free, b_queue_from_ui_free,
+                                                     b_queue_from_parquet_free)
 
     def get_img_from_camera(self):
         ret_img = []
