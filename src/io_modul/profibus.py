@@ -1,5 +1,4 @@
 from pymodbus.client.sync import ModbusTcpClient
-# import time
 from src.config import Config
 
 sendPLC = {'W_Live_Bit': None, 'W_Emergency_Stop': None, 'W_Defect_bool': None, 'W_spare_04': None, 'W_spare_05': None,
@@ -30,30 +29,21 @@ class Profibus:
                                  auto_close=True, timeout=10)
         while True:
             client.connect()
+            # Start address to read from=0, length=64, Modbus slave ID
             rr = client.read_holding_registers(1000, lengthRead, unit=self.config.PROFIBUS_SLAVE)
-            # FUNCTIE 03 - Read register (Start address to read from=0, length=64, Modbus slave ID)
             print(rr.registers)
 
-    def write(self, toPLC_1):
-        self.toPLC = toPLC_1
+    def write(self):
 
         client = ModbusTcpClient(host=self.config.PROFIBUS_HOST, port=self.config.PROFIBUS_PORT,
                                  unit_id=self.config.PROFIBUS_SLAVE, auto_open=True, auto_close=True, timeout=10)
         while True:
             client.connect()
-            # To Write values to multiple registers
-            #     list = []
-            #     for i in range(10):
-            #         data = random.randint(25,35)
-            #         list.append(data)
+            # Start address to read from=14, List of booleans to write, Modbus slave unit ID
             wr = client.write_registers(14, self.toPLC, unit=self.config.PROFIBUS_SLAVE)
-            # FUNCTIE 10 - (Write register) (Start address to read from=14,
-            # List of booleans to write, Modbus slave unit ID)
-            # write to multiple registers using list of data
-            # wr = client.write_registers(1000,list,unit=1)
             print(wr)
 
 
 if __name__ == '__main__':
     Profibus().read()
-    Profibus().write(sendPLC)
+    Profibus().write()
