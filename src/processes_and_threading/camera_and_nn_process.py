@@ -1,7 +1,9 @@
 from ..camera import Camera
 from src.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
+
 import time
 import random
+import numpy as np
 
 
 class CameraAndNNProcess(BaseProcess):
@@ -115,18 +117,22 @@ class CameraAndNNProcess(BaseProcess):
         ret_img = []
         img = self.camera.get_img()
         color_img = self.camera.color_img_to_the_colormap(img)
-        ret_img.append(img)
         ret_img.append(color_img)
+        if random.random() > 0.95:
+            ret_img.append(color_img)
         return ret_img
 
     def create_task_to_write_parquet(self, img_list):
         img_to_parquet = list.copy(img_list)
-        img_to_parquet[0] = self.camera.convert_img_to_one_row(img_to_parquet[0])
-        img_to_parquet[1] = self.camera.convert_img_to_one_row(img_to_parquet[1])
+        for i in range(len(img_to_parquet)):
+            img_to_parquet[i] = self.camera.convert_img_to_one_row(img_to_parquet[i])
+        if len(img_to_parquet) == 1:
+            img_to_parquet.append(np.zeros((1,1)))
         # пока нет железа имитируем данные с ПЛК
         data_frame = [time.time(), random.randint(10, 10000), random.random(),
-                      self.camera.config.OUT_FRAME_WIDTH * self.camera.config.OUT_FRAME_HEIGHT, list(img_to_parquet[0]),
-                      list(img_to_parquet[1])]
+                      self.camera.config.OUT_FRAME_WIDTH * self.camera.config.OUT_FRAME_HEIGHT]
+        for el in img_to_parquet:
+            data_frame.append(list(el))
         return data_frame
 
     # обработчики задач

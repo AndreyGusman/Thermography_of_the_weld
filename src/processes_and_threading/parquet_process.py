@@ -138,6 +138,7 @@ class ParquetProcess(BaseProcess):
             pass
         elif name == 'Stop module':
             self.b_work = False
+            self.b_create_task = False
         else:
             self.create_logging_task(data=f'Parquet process default task  solution is not defined, task name {name}')
 

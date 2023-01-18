@@ -5,10 +5,11 @@ from src.config import Config
 
 
 # класс наследуется от базового класса, чтобы иметь нативную поддержку работы с Pipe и Task
-class MainProgram:
+class MainProgram(BaseProcess):
     def __init__(self):
-
+        super().__init__(None)
         # собственный экземпляр конфигурации
+
         self.config = Config()
 
         # объявление  процессов
@@ -106,6 +107,10 @@ class MainProgram:
                                                                            self.default_task_handler)
         self.from_ui_task_executor = BaseProcess.create_task_executor(self.queue_from_ui, self.from_ui_task_handler,
                                                                       self.default_task_handler)
+        # расширяем список стандартных задач для главного процесса
+        self.from_camera_task_executor.default_task_name.append('Write Log')
+        self.from_parquet_task_executor.default_task_name.append('Write Log')
+        self.from_ui_task_executor.default_task_name.append('Write Log')
 
     def run(self):
         pass
@@ -116,7 +121,6 @@ class MainProgram:
         self.start_processes()
         self.init_pipe_worker()
         self.init_task_executor()
-
 
         # создание потоков нельзя перенести в __init__!
         self.thread_work_with_object = BaseProcess.create_thread(self.work_with_object)
@@ -151,7 +155,6 @@ class MainProgram:
 
     def work_with_object(self):
 
-
         while self.b_create_task:
             self.b_work_camera_process = self.camera_and_nn_process.is_alive()
             self.b_work_ui_process = self.ui_process.is_alive()
@@ -172,8 +175,8 @@ class MainProgram:
     # обработчики задач
     def from_ui_task_handler(self, task):
         name, data, decode_task = BaseProcess.decode_task(task)
-        if task.name == 'Write Log':
-            print(task.data)
+        if name == 'next task':
+            pass
         elif name == 'next task':
             pass
         else:
@@ -181,8 +184,8 @@ class MainProgram:
 
     def from_parquet_task_handler(self, task):
         name, data, decode_task = BaseProcess.decode_task(task)
-        if task.name == 'Write Log':
-            print(task.data)
+        if name == 'next task':
+            pass
         elif name == 'next task':
             pass
         else:
@@ -190,8 +193,8 @@ class MainProgram:
 
     def from_camera_task_handler(self, task):
         name, data, decode_task = BaseProcess.decode_task(task)
-        if task.name == 'Write Log':
-            print(task.data)
+        if name == 'next task':
+            pass
         elif name == 'next task':
             pass
         else:
@@ -205,6 +208,8 @@ class MainProgram:
             pass
         elif name == 'Stop module':
             self.b_work = False
+        elif name == 'Write Log':
+            print(task.data)
         else:
             print(f'Main not the solution is not defined, task name {name}')
 

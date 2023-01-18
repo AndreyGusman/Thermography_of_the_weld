@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from src.config import Config
 import matplotlib.pyplot as plt
+import matplotlib as mlp
 
 
 class Camera:
@@ -10,7 +11,9 @@ class Camera:
         self.gray_img = None
         self.capture = None
         self.config = Config()
-        self.colormap = plt.get_cmap('inferno')  # 'inferno'
+        colors = ["blue", "green", "green", "red"]
+        nodes = [0.0, 0.5, 0.5, 1.0]
+        self.colormap = mlp.colors.LinearSegmentedColormap.from_list("mycmap", list(zip(nodes, colors)))  # 'inferno'
 
     def get_current_config(self):
         camera_config = {"CAMERA_NAME": self.config.CAMERA_NAME,
@@ -125,5 +128,30 @@ def test_2():
             break
 
 
+def plot_examples(colormaps):
+    """
+    Helper function to plot data with associated colormap.
+    """
+    np.random.seed(19680801)
+    data = np.random.randn(30, 30)
+    n = len(colormaps)
+    fig, axs = plt.subplots(1, n, figsize=(n * 2 + 2, 3),
+                            constrained_layout=True, squeeze=False)
+    for [ax, cmap] in zip(axs.flat, colormaps):
+        psm = ax.pcolormesh(data, cmap=cmap, rasterized=True, vmin=-4, vmax=4)
+        fig.colorbar(psm, ax=ax)
+    plt.show()
+
+
+def test_colormap():
+    colors = ["blue", "green", "green", "red"]
+    cmap1 = mlp.colors.LinearSegmentedColormap.from_list("mycmap", colors)
+    nodes = [0.0, 0.2, 0.6, 1.0]
+    cmap2 = mlp.colors.LinearSegmentedColormap.from_list("mycmap", list(zip(nodes, colors)))
+
+    print(cmap2)
+    plot_examples([cmap1, cmap2])
+
+
 if __name__ == '__main__':
-    test_2()
+    test_colormap()

@@ -117,8 +117,11 @@ class UIProcess(BaseProcess):
     def from_camera_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
         if name == 'Show img':
-            self.ui_window.update_current_img(data[0], False)
-            self.ui_window.update_broke_img(data[1], True)
+            if len(data) == 1:
+                self.ui_window.update_current_img(data[0], True)
+            else:
+                self.ui_window.update_current_img(data[0], True)
+                self.ui_window.update_broke_img(data[1], True)
             # self.create_logging_task(data=f'frame update {time.time()}')
         elif name == 'next task':
             pass
