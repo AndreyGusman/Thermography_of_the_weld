@@ -22,7 +22,7 @@ class TaskExecutor:
         self.default_task_handler = default_task_handler
 
         self.send_recv_time_limit = Config.SEND_RECEIVE_TIME_LIMIT
-        self.timeout = Config.PIPE_TIMEOUT
+        self.timeout = Config.TASK_EXECUTOR_TIMEOUT
 
         self.time_last_recv = time.time()
 

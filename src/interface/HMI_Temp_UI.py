@@ -16,20 +16,38 @@ class UI(QMainWindow):
         uic.loadUi("resources/ui_res/HMI_rev2.ui", self)
 
         # Определение виджетов
+
+        # Buttons
+        # Главный экран
         self.btn_Main_screen = self.findChild(QPushButton, "btn_Main_screen")
+        # Параметры
         self.btn_Parametr = self.findChild(QPushButton, "btn_Parametr")
+        # Трансфокатор
         self.btn_Transf = self.findChild(QPushButton, "btn_Transf")
+        # Архив
         self.btn_Arch = self.findChild(QPushButton, "btn_Arch")
+        # Применение даты и времени
         self.btn_Set_DT = self.findChild(QPushButton, "btn_Set_DT")
 
         self.StackedWidget = self.findChild(QStackedWidget, "stackedWidget")
 
+        # Label
+        # Связь профибас
         self.l_Profibus_OK = self.findChild(QLabel, "l_Profibus_OK")
+        # Связь с трансфокатором
         self.l_Transf_OK = self.findChild(QLabel, "l_Transf_OK")
+        # Связь с камерой
         self.l_Camera_OK = self.findChild(QLabel, "l_Camera_OK")
+        # Текущий кадр (Главный экран)
         self.l_Current_img = self.findChild(QLabel, "l_Current_img")
+        # Текущий кадр 2 (Трансфокатор)
+        self.l_Current_img_2 = self.findChild(QLabel, "l_Current_img_2")
+        # Дефектный кадр
         self.l_NG_img = self.findChild(QLabel, "l_NG_img")
+        # Архивный кадр
+        self.l_Arch_img = self.findChild(QLabel, "l_Arch_img")
 
+        # GroupBox
         self.groupBox_4 = self.findChild(QGroupBox, "groupBox_4")
         self.groupBox_2 = self.findChild(QGroupBox, "groupBox_2")
         self.groupBox_3 = self.findChild(QGroupBox, "groupBox_3")
@@ -40,32 +58,42 @@ class UI(QMainWindow):
         self.groupBox_9 = self.findChild(QGroupBox, "groupBox_9")
         self.groupBox_10 = self.findChild(QGroupBox, "groupBox_10")
 
+        # LCDNumber
         self.lcd_Pos_UZK = self.findChild(QLCDNumber, "lcd_Pos_UZK")
+        self.lcd_Pos_UZK_2 = self.findChild(QLCDNumber, "lcd_Pos_UZK_2")
         self.lcd_RollersSpeedSet = self.findChild(QLCDNumber, "lcd_RollersSpeedSet")
+        self.lcd_RollersSpeedSet_2 = self.findChild(QLCDNumber, "lcd_RollersSpeedSet_2")
         self.lcd_RollersSpeedAkt = self.findChild(QLCDNumber, "lcd_RollersSpeedAkt")
+        self.lcd_RollersSpeedAkt_2 = self.findChild(QLCDNumber, "lcd_RollersSpeedAkt_2")
         self.lcd_Diam = self.findChild(QLCDNumber, "lcd_Diam")
+        self.lcd_Diam_2 = self.findChild(QLCDNumber, "lcd_Diam_2")
+
+        self.lcd_Defect = self.findChild(QLCDNumber, "lcd_Defect")
+        self.lcd_Defect_Place = self.findChild(QLCDNumber, "lcd_Defect_Place")
+        self.lcd_Temperature = self.findChild(QLCDNumber, "lcd_Temperature")
+        self.lcdNum_Empty = self.findChild(QLCDNumber, "lcdNum_Empty")
 
         self.lcd_Focus_Delta = self.findChild(QLCDNumber, "lcd_Focus_Delta")
         self.lcd_Zoom_Delta = self.findChild(QLCDNumber, "lcd_Zoom_Delta")
 
+        self.lcd_frame_frequency = self.findChild(QLCDNumber, "lcd_frame_frequency")
+
+        # CalendarWidget
         self.calendar = self.findChild(QCalendarWidget, "calendar")
 
+        # SpinBox
         self.B_Hour = self.findChild(QSpinBox, "B_Hour")
         self.B_Minute = self.findChild(QSpinBox, "B_Minute")
         self.B_Second = self.findChild(QSpinBox, "B_Second")
 
+        # TreeView
         self.T_Parquet = self.findChild(QTreeView, "T_Parquet")
 
+        # ScrollBar
         self.ScrollBar_Parquet = self.findChild(QScrollBar, "ScrollBar_Parquet")
 
+        # DateTimeEdit
         self.dateTimeArch = self.findChild(QDateTimeEdit, "dateTimeArch")
-
-        # Определение событий элементов
-        self.btn_Main_screen.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(0))
-        self.btn_Parametr.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(2))
-        self.btn_Transf.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(1))
-        self.btn_Arch.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(3))
-        self.btn_Set_DT.clicked.connect(self.set_DT)
 
         # Show the App
         self.show()
@@ -82,26 +110,26 @@ class UI(QMainWindow):
 
     def check_profibus(self, net_status):
         if net_status:
-            pix = QtGui.QPixmap('../../resources/ui_res/icons8_ok.ico')
+            pix = QtGui.QPixmap('resources/ui_res/icons8_ok.ico')
             self.l_Profibus_OK.setPixmap(pix)
         else:
-            pix = QtGui.QPixmap('../../resources/ui_res/icons8_cancel.ico')
+            pix = QtGui.QPixmap('resources/ui_res/icons8_cancel.ico')
             self.l_Profibus_OK.setPixmap(pix)
 
     def check_transf(self, net_status):
         if net_status:
-            pix = QtGui.QPixmap('../../resources/ui_res/icons8_ok.ico')
+            pix = QtGui.QPixmap('resources/ui_res/icons8_ok.ico')
             self.l_Transf_OK.setPixmap(pix)
         else:
-            pix = QtGui.QPixmap('../../resources/ui_res/icons8_cancel.ico')
+            pix = QtGui.QPixmap('resources/ui_res/icons8_cancel.ico')
             self.l_Transf_OK.setPixmap(pix)
 
     def check_camera(self, net_status):
         if net_status:
-            pix = QtGui.QPixmap('../../resources/ui_res/icons8_ok.ico')
+            pix = QtGui.QPixmap('resources/ui_res/icons8_ok.ico')
             self.l_Camera_OK.setPixmap(pix)
         else:
-            pix = QtGui.QPixmap('../../resources/ui_res/icons8_cancel.ico')
+            pix = QtGui.QPixmap('resources/ui_res/icons8_cancel.ico')
             self.l_Camera_OK.setPixmap(pix)
 
     def set_DT(self):
@@ -117,6 +145,52 @@ class UI(QMainWindow):
         h = list[3]
         m = list[4]
         print(year, month, day, h, m)
+
+        # Главная страница -> характеристики текущие (с профибаса)
+
+    def set_lcd_Pos_UZK(self, x):
+        perem = x
+        self.lcd_Pos_UZK.value(perem)
+        self.lcd_Pos_UZK_2.value(perem)
+
+    def lcd_RollersSpeedSet(self, x):
+        perem = x
+        self.lcd_RollersSpeedSet.value(perem)
+
+    def lcd_RollersSpeedAkt(self, x):
+        perem = x
+        self.lcd_RollersSpeedAkt.value(perem)
+
+    def lcd_Diam(self, x):
+        perem = x
+        self.lcd_Diam.value(perem)
+
+        # Главная страница -> характеристики дефектные
+
+    def lcd_Defect(self, x):
+        perem = x
+        self.lcd_Defect.value(perem)
+
+    def lcd_Defect_Place(self, x):
+        perem = x
+        self.lcd_Defect_Place.value(perem)
+
+    def lcd_Temperature(self, x):
+        perem = x
+        self.lcd_Temperature.value(perem)
+
+        # Cтраница параметры
+
+    def lcd_frame_frequency(self):
+        return self.lcd_frame_frequency.value()
+
+        # Cтраница трансфокатора
+
+    def lcd_Focus_Delta(self):
+        return self.lcd_Focus_Delta.value()
+
+    def lcd_Zoom_Delta(self):
+        return self.lcd_Zoom_Delta.value()
 
     def _on_double_clicked(self):
         pass

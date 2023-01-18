@@ -139,8 +139,10 @@ class UIProcess(BaseProcess):
 
     def from_parquet_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
-        if name == 'next task':
-            pass
+        if name == 'Update transfocator status':
+            self.ui_window.check_transf(data)
+        elif name == 'Update profibus status':
+            self.ui_window.check_profibus(data)
         elif name == 'next task':
             pass
         else:

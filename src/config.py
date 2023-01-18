@@ -1,6 +1,7 @@
 class Config:
     # константы системы
-    PIPE_TIMEOUT = 0.001
+    PIPE_TIMEOUT = -0.001
+    TASK_EXECUTOR_TIMEOUT = 0.01
     SEND_RECEIVE_TIME_LIMIT = 1
 
     # константы камеры

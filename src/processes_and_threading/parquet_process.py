@@ -1,3 +1,5 @@
+import time
+import random as rd
 from ..parquet import *
 from src.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
 
@@ -50,6 +52,9 @@ class ParquetProcess(BaseProcess):
         self.b_pipe_free = False
         self.b_queue_free = False
         self.b_create_task = True
+        # Временные переменные
+        self.profibus_status = False
+        self.transfocator_status = False
 
     def run(self):
         self.action()
@@ -86,8 +91,26 @@ class ParquetProcess(BaseProcess):
             self.b_pipe_free = self.check_pipe_free(b_pipe_to_main_free, b_pipe_to_ui_free, b_pipe_to_camera_free)
 
     def work_with_object(self):
-        # пока задач не создаёт, только исполняет
-        pass
+        self.create_task(name='Update transfocator status', data=self.transfocator_status, queue=self.queue_to_ui)
+        self.create_task(name='Update profibus status', data=self.profibus_status, queue=self.queue_to_ui)
+        # пока нет оборудования применяются функции затычки
+        timer_change_net_status = time.time()
+        timer_change_tech_info = time.time()
+        while self.b_create_task:
+            if time.time() - timer_change_net_status > 2:
+                timer_change_net_status = time.time()
+                if rd.random() > 0.5:
+                    self.profibus_status = not self.profibus_status
+                    self.create_task(name='Update profibus status', data=self.profibus_status, queue=self.queue_to_ui)
+
+                if rd.random() > 0.5:
+                    self.transfocator_status = not self.transfocator_status
+                    self.create_task(name='Update transfocator status', data=self.transfocator_status,
+                                     queue=self.queue_to_ui)
+
+            if time.time() - timer_change_tech_info > 2:
+                timer_change_tech_info = time.time()
+
 
     # задача потока работы с задачами
     def work_with_task(self):
