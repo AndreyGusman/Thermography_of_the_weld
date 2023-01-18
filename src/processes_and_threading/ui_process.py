@@ -10,9 +10,8 @@ class UIProcess(BaseProcess):
         super().__init__(pipe_to_main)
 
         # инициализация рабочего объекта
-        self.ui = None
         self.app = None
-        self.MainWindow = None
+        self.ui_window = None
 
         # временно конфиг хранится в процессе
         self.config = Config()
@@ -86,8 +85,7 @@ class UIProcess(BaseProcess):
 
     # задача потока работы с обьектом (создание и отслеживание действий на экране)
     def work_with_object(self):
-        self.ui, self.app, self.MainWindow = UiMainWindow.create_ui()
-        self.MainWindow.show()
+        self.app, self.ui_window = create_ui()
         self.thread_work_with_pipe.start()
         self.thread_work_with_task.start()
         self.create_logging_task(data='UI create')
@@ -119,8 +117,8 @@ class UIProcess(BaseProcess):
     def from_camera_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
         if name == 'Show img':
-            self.ui.update_current_img(data[0], self.ui, self.MainWindow, False)
-            self.ui.update_broke_img(data[1], self.ui, self.MainWindow, True)
+            self.ui_window.update_current_img(data[0], False)
+            self.ui_window.update_broke_img(data[1], True)
             # self.create_logging_task(data=f'frame update {time.time()}')
         elif name == 'next task':
             pass

@@ -7,5 +7,4 @@ if __name__ == '__main__':
     print('start main')
     main = MainProgram()
     main.action()
-    time.sleep(60)
     print('main close')
