@@ -95,6 +95,13 @@ class UI(QMainWindow):
         # DateTimeEdit
         self.dateTimeArch = self.findChild(QDateTimeEdit, "dateTimeArch")
 
+        # Определение событий элементов
+        self.btn_Main_screen.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(0))
+        self.btn_Parametr.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(2))
+        self.btn_Transf.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(1))
+        self.btn_Arch.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(3))
+        self.btn_Set_DT.clicked.connect(self.set_DT)
+
         # Show the App
         self.show()
 
@@ -188,17 +195,13 @@ class UI(QMainWindow):
     def _on_double_clicked(self):
         pass
 
-    def update_broke_img(self, img, update):
+    def update_broke_img(self, img):
         pix = self.get_pix_map(img)
         self.l_NG_img.setPixmap(pix)
-        if update:
-            self.update()
 
-    def update_current_img(self, img, update):
+    def update_current_img(self, img):
         pix = self.get_pix_map(img)
         self.l_Current_img.setPixmap(pix)
-        if update:
-            self.update()
 
     def get_pix_map(self, img):
         if len(img.shape) == 2:
