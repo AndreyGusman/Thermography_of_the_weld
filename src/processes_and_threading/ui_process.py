@@ -106,6 +106,17 @@ class UIProcess(BaseProcess):
 
     # задача потока работы с задачами
     def work_with_task(self):
+
+        self.ui_window.set_val_lcd_pos_uzk(val=1)
+        self.ui_window.set_val_lcd_rollers_speed_set(val=2)
+        self.ui_window.set_val_lcd_rollers_speed_akt(val=3)
+        self.ui_window.set_val_lcd_diam(val=4)
+        self.ui_window.set_val_lcd_defect(val=5)
+        print(type(self.ui_window.lcd_Defect))
+        print(type(self.ui_window.lcd_Defect_Place))
+        print(type(self.ui_window.lcd_Temperature))
+        # self.ui_window.set_val_lcd_defect_place(val=6)
+        # self.ui_window.set_val_lcd_temperature(val=7)
         while self.b_work or not self.b_pipe_free or not self.b_queue_free:
             b_queue_from_main_free = self.from_main_task_executor.work()
             b_queue_from_camera_free = self.from_camera_task_executor.work()
@@ -140,9 +151,9 @@ class UIProcess(BaseProcess):
     def from_parquet_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
         if name == 'Update transfocator status':
-            self.ui_window.check_transf(data)
+            self.ui_window.set_status_transfocator(data)
         elif name == 'Update profibus status':
-            self.ui_window.check_profibus(data)
+            self.ui_window.set_status_profibus(data)
         elif name == 'next task':
             pass
         else:

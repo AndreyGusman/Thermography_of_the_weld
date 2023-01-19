@@ -108,7 +108,7 @@ class UI(QMainWindow):
         self.T_Parquet.setIndentation(20)
         self.T_Parquet.setSortingEnabled(True)
 
-    def check_profibus(self, net_status):
+    def set_status_profibus(self, net_status):
         if net_status:
             pix = QtGui.QPixmap('resources/ui_res/icons8_ok.ico')
             self.l_Profibus_OK.setPixmap(pix)
@@ -116,7 +116,7 @@ class UI(QMainWindow):
             pix = QtGui.QPixmap('resources/ui_res/icons8_cancel.ico')
             self.l_Profibus_OK.setPixmap(pix)
 
-    def check_transf(self, net_status):
+    def set_status_transfocator(self, net_status):
         if net_status:
             pix = QtGui.QPixmap('resources/ui_res/icons8_ok.ico')
             self.l_Transf_OK.setPixmap(pix)
@@ -124,7 +124,7 @@ class UI(QMainWindow):
             pix = QtGui.QPixmap('resources/ui_res/icons8_cancel.ico')
             self.l_Transf_OK.setPixmap(pix)
 
-    def check_camera(self, net_status):
+    def set_status_camera(self, net_status):
         if net_status:
             pix = QtGui.QPixmap('resources/ui_res/icons8_ok.ico')
             self.l_Camera_OK.setPixmap(pix)
@@ -148,48 +148,41 @@ class UI(QMainWindow):
 
         # Главная страница -> характеристики текущие (с профибаса)
 
-    def set_lcd_Pos_UZK(self, x):
-        perem = x
-        self.lcd_Pos_UZK.value(perem)
-        self.lcd_Pos_UZK_2.value(perem)
+    def set_val_lcd_pos_uzk(self, val):
+        self.lcd_Pos_UZK.display(val)
+        self.lcd_Pos_UZK_2.display(val)
 
-    def lcd_RollersSpeedSet(self, x):
-        perem = x
-        self.lcd_RollersSpeedSet.value(perem)
+    def set_val_lcd_rollers_speed_set(self, val):
+        self.lcd_RollersSpeedSet.display(val)
 
-    def lcd_RollersSpeedAkt(self, x):
-        perem = x
-        self.lcd_RollersSpeedAkt.value(perem)
+    def set_val_lcd_rollers_speed_akt(self, val):
+        self.lcd_RollersSpeedAkt.display(val)
 
-    def lcd_Diam(self, x):
-        perem = x
-        self.lcd_Diam.value(perem)
+    def set_val_lcd_diam(self, val):
+        self.lcd_Diam.display(val)
 
         # Главная страница -> характеристики дефектные
 
-    def lcd_Defect(self, x):
-        perem = x
-        self.lcd_Defect.value(perem)
+    def set_val_lcd_defect(self, val):
+        self.lcd_Defect.display(val)
 
-    def lcd_Defect_Place(self, x):
-        perem = x
-        self.lcd_Defect_Place.value(perem)
+    def set_val_lcd_defect_place(self, val):
+        self.lcd_Defect_Place.display(val)
 
-    def lcd_Temperature(self, x):
-        perem = x
-        self.lcd_Temperature.value(perem)
+    def set_val_lcd_temperature(self, val):
+        self.lcd_Temperature.display(val)
 
         # Cтраница параметры
 
-    def lcd_frame_frequency(self):
+    def get_val_lcd_frame_frequency(self):
         return self.lcd_frame_frequency.value()
 
         # Cтраница трансфокатора
 
-    def lcd_Focus_Delta(self):
+    def get_val_lcd_focus_delta(self):
         return self.lcd_Focus_Delta.value()
 
-    def lcd_Zoom_Delta(self):
+    def get_val_lcd_zoom_delta(self):
         return self.lcd_Zoom_Delta.value()
 
     def _on_double_clicked(self):
