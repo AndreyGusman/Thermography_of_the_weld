@@ -191,14 +191,12 @@ class UI(QMainWindow):
     def update_broke_img(self, img, update):
         pix = self.get_pix_map(img)
         self.l_NG_img.setPixmap(pix)
-        if update:
-            self.update()
+
 
     def update_current_img(self, img, update):
         pix = self.get_pix_map(img)
         self.l_Current_img.setPixmap(pix)
-        if update:
-            self.update()
+
 
     def get_pix_map(self, img):
         if len(img.shape) == 2:
