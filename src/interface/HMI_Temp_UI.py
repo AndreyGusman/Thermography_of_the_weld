@@ -225,6 +225,27 @@ class UI(QMainWindow):
         pix = QtGui.QPixmap(image)
         return pix
 
+    def update_current_img_plc_data(self, data: dict):
+        var_to_update_func = {'Pos_UZK': self.set_val_lcd_pos_uzk,
+                              'RollersSpeedSet': self.set_val_lcd_rollers_speed_set,
+                              'RollersSpeedAkt': self.set_val_lcd_rollers_speed_akt, 'Diam': self.set_val_lcd_diam
+                              }
+        for key in var_to_update_func:
+            # var_to_update_func словарь сопоставления имён переменных получаемых из data и функций куда
+            # их нужно передать для обновления. var_to_update_func.get(key) получает ссылку на функцию
+            # (val=data.get(key)) вызывает функцию со следующими аргументами data.get(key)
+            var_to_update_func.get(key)(val=data.get(key))
+
+    def update_plc_data(self, data: dict):
+        var_to_update_func = {'Pos_UZK': self.set_val_lcd_pos_uzk,
+                              'RollersSpeedSet': self.set_val_lcd_rollers_speed_set,
+                              'RollersSpeedAkt': self.set_val_lcd_rollers_speed_akt, 'Diam': self.set_val_lcd_diam
+                              }
+        for key in var_to_update_func:
+            # var_to_update_func словарь сопоставления имён переменных получаемых из data и функций куда
+            # их нужно передать для обновления. var_to_update_func.get(key) получает ссылку на функцию
+            # (val=data.get(key)) вызывает функцию со следующими аргументами data.get(key)
+            var_to_update_func.get(key)(val=data.get(key))
 
 def create_ui():
     new_app = QApplication(sys.argv)

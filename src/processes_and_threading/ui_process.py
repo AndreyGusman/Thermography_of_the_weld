@@ -106,18 +106,8 @@ class UIProcess(BaseProcess):
 
     # задача потока работы с задачами
     def work_with_task(self):
-        test_val = 0
-        self.ui_window.set_val_lcd_pos_uzk(val=1)
-        self.ui_window.set_val_lcd_rollers_speed_set(val=2)
-        self.ui_window.set_val_lcd_rollers_speed_akt(val=3)
-        self.ui_window.set_val_lcd_diam(val=4)
-        self.ui_window.set_val_lcd_defect(val=5)
 
-        self.ui_window.set_val_lcd_defect_place(val=6)
-        self.ui_window.set_val_lcd_temperature(val=7)
         while self.b_work or not self.b_pipe_free or not self.b_queue_free:
-            self.ui_window.set_val_lcd_pos_uzk(val=test_val)
-            test_val += 1
             b_queue_from_main_free = self.from_main_task_executor.work()
             b_queue_from_camera_free = self.from_camera_task_executor.work()
             b_queue_from_parquet_free = self.from_parquet_task_executor.work()
@@ -153,6 +143,8 @@ class UIProcess(BaseProcess):
             self.ui_window.set_status_transfocator(data)
         elif name == 'Update profibus status':
             self.ui_window.set_status_profibus(data)
+        elif name == 'next task':
+            pass
         elif name == 'next task':
             pass
         else:

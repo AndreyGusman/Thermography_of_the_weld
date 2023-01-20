@@ -116,10 +116,9 @@ class CameraAndNNProcess(BaseProcess):
     def get_img_from_camera(self):
         ret_img = []
         img = self.camera.get_img()
-        color_img = self.camera.color_img_to_the_colormap(img)
-        ret_img.append(color_img)
+        ret_img.append(img)
         if random.random() > 0.95:
-            ret_img.append(color_img)
+            ret_img.append(img)
         return ret_img
 
     def create_task_to_write_parquet(self, img_list):
@@ -158,8 +157,8 @@ class CameraAndNNProcess(BaseProcess):
 
     def from_parquet_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
-        if name == 'next task':
-            pass
+        if name == 'Update plc data':
+            self.camera.update_current_plc_data(data)
         elif name == 'next task':
             pass
         else:

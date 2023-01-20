@@ -14,20 +14,7 @@ class Camera:
         colors = ["blue", "green", "green", "red"]
         nodes = [0.0, 0.5, 0.5, 1.0]
         self.colormap = mlp.colors.LinearSegmentedColormap.from_list("mycmap", list(zip(nodes, colors)))  # 'inferno'
-
-    def get_current_config(self):
-        camera_config = {"CAMERA_NAME": self.config.CAMERA_NAME,
-                         "OUT_FRAME_HEIGHT": self.config.OUT_FRAME_HEIGHT,
-                         "OUT_FRAME_WIDTH": self.config.OUT_FRAME_WIDTH,
-                         "USE_NOTEBOOK_CAMERA": self.config.USE_NOTEBOOK_CAMERA,
-                         "SOURCE_FRAME_HEIGHT": self.config.SOURCE_FRAME_HEIGHT,
-                         "SOURCE_FRAME_WIDTH": self.config.SOURCE_FRAME_WIDTH,
-                         "ROTATION_ANGLE": self.config.ROTATION_ANGLE,
-                         "CAMERA_ADC": self.config.CAMERA_ADC,
-                         "CONVERT_TO_8BIT": self.config.CONVERT_TO_8BIT,
-                         "NORMALIZATION": self.config.NORMALIZATION
-                         }
-        return camera_config
+        self.current_plc_data = None
 
     def get_capture(self):
         self.capture = cv2.VideoCapture(self.config.CAMERA_NAME)
@@ -87,6 +74,9 @@ class Camera:
         rgb_img = (self.colormap(img) * 2 ** 8).astype(np.uint8)[:, :, :3]
 
         return rgb_img
+
+    def update_current_plc_data(self, data):
+        self.current_plc_data = data
 
     @staticmethod
     def convert_img_to_one_row(conv_img: np.array):
