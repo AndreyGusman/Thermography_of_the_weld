@@ -1,3 +1,5 @@
+import time
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,14 +11,17 @@ from src.data_format import DataFormat
 
 class Camera:
     def __init__(self):
-        self.origin_img = None
-        self.gray_img = None
         self.capture = None
         self.config = Config()
         colors = ["blue", "green", "green", "red"]
         nodes = [0.0, 0.5, 0.5, 1.0]
         self.colormap = mlp.colors.LinearSegmentedColormap.from_list("mycmap", list(zip(nodes, colors)))  # 'inferno'
-        self.current_plc_data = None
+
+        self.current_plc_data = {}
+        self.origin_img = None
+        self.gray_img = None
+        self.time_last_img = None
+        self.calculated_frame_coordinate = None
 
     def get_capture(self):
         self.capture = cv2.VideoCapture(self.config.CAMERA_NAME)
@@ -56,6 +61,9 @@ class Camera:
             else:
                 self.gray_img = self.capture.read()
 
+            self.time_last_img = time.time()
+            self.calculated_frame_coordinate = self.current_plc_data.get('Pos_UZK')
+
             if self.config.ROTATION_ANGLE:
                 self.rotation_img()
 
@@ -90,6 +98,29 @@ class Camera:
         rgb_img = (self.colormap(img) * 2 ** 8).astype(np.uint8)[:, :, :3]
 
         return rgb_img
+
+    def create_data_frame_to_parquet(self):
+        if self.config.PARQUET_MODE == 1:
+            var_name_to_parquet = DataFormat.parquet_format_mode_1.copy()
+            ret_dict = {var_name: self.current_plc_data.get(var_name) for var_name in var_name_to_parquet}
+            ret_dict['Image'] = self.gray_img
+            ret_dict['Length'] = self.calculated_frame_coordinate
+            ret_dict['Time'] = self.time_last_img
+            ret_dict['reserve zone 1'] = 0
+            ret_dict['reserve zone 2'] = 0
+            return ret_dict
+
+        # img_to_parquet = dict.copy(dict_img)
+        # for i in range(len(img_to_parquet)):
+        #     img_to_parquet[i] = self.camera.convert_img_to_one_row(img_to_parquet[i])
+        # if len(img_to_parquet) == 1:
+        #     img_to_parquet.append(np.zeros((1, 1)))
+        # # пока нет железа имитируем данные с ПЛК
+        # data_frame = [time.time(), random.randint(10, 10000), random.random(),
+        #               self.camera.config.OUT_FRAME_WIDTH * self.camera.config.OUT_FRAME_HEIGHT]
+        # for el in img_to_parquet:
+        #     data_frame.append(list(el))
+        # return data_frame
 
     def update_current_plc_data(self, data):
         self.current_plc_data = data

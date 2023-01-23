@@ -32,14 +32,18 @@ class DataFormat:
     # формат посылки интерфейсу от камеры, содержит картинку и сопутствующие данные
     dict_camera_to_interface = {'current_img': None, 'broken_img': None}
 
-    # формат посылки записи паркета на этапе пуско-наладночных работ
-    parquet_format_first_stage = ['Time', 'Length', 'reserve zone 1', 'reserve zone 2', 'reserve zone 3',
-                                  'reserve zone 4', 'reserve zone 5', 'reserve zone 6', 'reserve zone 7',
-                                  'reserve zone 8', 'reserve zone 9', 'Image']
+    # формат посылки записи паркета см. config.PARQUET_MODE
+    parquet_format_mode_1 = ['Time', 'Length', 'Pos_UZK', 'Part_Coil_UZK', 'Part_Coil_TOS',
+                             'Count_Pipe', 'Length_Pipe', 'Num_Pipe', 'Num_Coil_UZK',
+                             'reserve zone 1', 'reserve zone 2', 'Image']
 
-    parquet_format = ['Time', 'Length', 'reserve zone 1', 'reserve zone 2', 'reserve zone 3',
-                      'reserve zone 4', 'reserve zone 5', 'reserve zone 6', 'reserve zone 7',
-                      'reserve zone 8', 'reserve zone 9', 'Image', 'Defect mask', 'type']
+    parquet_format_mode_2 = ['Time', 'Length', 'Pos_UZK', 'Part_Coil_UZK', 'Part_Coil_TOS',
+                             'Count_Pipe', 'Length_Pipe', 'Num_Pipe', 'Num_Coil_UZK',
+                             'reserve zone 1', 'reserve zone 2', 'Image', 'Defect mask']
+
+    parquet_format_mode_3 = ['Time', 'Length', 'Pos_UZK', 'Part_Coil_UZK', 'Part_Coil_TOS',
+                             'Count_Pipe', 'Length_Pipe', 'Num_Pipe', 'Num_Coil_UZK',
+                             'reserve zone 1', 'reserve zone 2', 'Image', 'Image', 'Defect mask', 'type']
 
     # Формат чтения/записи трансфокатора transfocator.py
     toCamera = {'Zoom+': None, 'Zoom-': None, 'SetZoom': None, 'Focus+': None, 'Focus-': None, 'SetFocus': None,
