@@ -1091,7 +1091,7 @@ QGroupBox::title {
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLCDNumber" name="lcd_Defect_8">
+                  <widget class="QLCDNumber" name="lcd_Defect_Place">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -1139,7 +1139,7 @@ QGroupBox::title {
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLCDNumber" name="lcd_Temperature_4">
+                  <widget class="QLCDNumber" name="lcd_Temperature">
                    <property name="font">
                     <font>
                      <family>Segoe UI</family>
@@ -1181,7 +1181,7 @@ QGroupBox::title {
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLCDNumber" name="lcdNumber_16">
+                  <widget class="QLCDNumber" name="lcdNum_Empty">
                    <property name="font">
                     <font>
                      <family>Segoe UI</family>
@@ -1953,7 +1953,7 @@ QGroupBox::title {
             </spacer>
            </item>
            <item>
-            <widget class="QLCDNumber" name="lcd_Zoom_Delta_2">
+            <widget class="QLCDNumber" name="lcd__frame_frequency">
              <property name="minimumSize">
               <size>
                <width>50</width>

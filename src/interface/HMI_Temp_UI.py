@@ -108,6 +108,13 @@ class UI(QMainWindow):
         # DateTimeEdit
         self.dateTimeArch = self.findChild(QDateTimeEdit, "dateTimeArch")
 
+        # Определение событий элементов
+        self.btn_Main_screen.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(0))
+        self.btn_Parametr.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(2))
+        self.btn_Transf.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(1))
+        self.btn_Arch.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(3))
+        self.btn_Set_DT.clicked.connect(self.set_DT)
+
         # Show the App
         self.show()
 
@@ -167,12 +174,15 @@ class UI(QMainWindow):
 
     def set_val_lcd_rollers_speed_set(self, val):
         self.lcd_RollersSpeedSet.display(val)
+        self.lcd_RollersSpeedSet_2.display(val)
 
     def set_val_lcd_rollers_speed_akt(self, val):
         self.lcd_RollersSpeedAkt.display(val)
+        self.lcd_RollersSpeedAkt_2.display(val)
 
     def set_val_lcd_diam(self, val):
         self.lcd_Diam.display(val)
+        self.lcd_Diam_2.display(val)
 
         # Главная страница -> характеристики дефектные
 
@@ -236,14 +246,25 @@ class UI(QMainWindow):
     def _on_double_clicked(self):
         pass
 
-    def update_broke_img(self, img, update):
-        pix = self.get_pix_map(img)
+    def show_img_and_plc_data(self, data: dict):
+        if data.get('current_img') is not None:
+            self.update_current_img(data.get('current_img'))
+        if data.get('broken_img') is not None:
+            self.update_defect_img(data.get('broken_img'))
+
+    def update_defect_img(self, data: dict):
+        pix = self.get_pix_map(data.pop('image'))
         self.l_NG_img.setPixmap(pix)
 
+        self.update_defect_img_data(data)
 
-    def update_current_img(self, img, update):
-        pix = self.get_pix_map(img)
+
+    def update_current_img(self, data: dict):
+        pix = self.get_pix_map(data.pop('image'))
         self.l_Current_img.setPixmap(pix)
+
+        self.l_Current_img_2.setPixmap(pix)
+        self.update_current_img_data(data)
 
 
     def get_pix_map(self, img):
@@ -267,6 +288,27 @@ class UI(QMainWindow):
                              img.shape[0], img.shape[1] * 3, QtGui.QImage.Format.Format_RGB888)
         pix = QtGui.QPixmap(image)
         return pix
+
+    def update_current_img_data(self, data: dict):
+        var_to_update_func = {'Pos_UZK': self.set_val_lcd_pos_uzk,
+                              'RollersSpeedSet': self.set_val_lcd_rollers_speed_set,
+                              'RollersSpeedAkt': self.set_val_lcd_rollers_speed_akt, 'Diam': self.set_val_lcd_diam
+                              }
+        for key in var_to_update_func:
+            # var_to_update_func словарь сопоставления имён переменных получаемых из data и функций куда
+            # их нужно передать для обновления. var_to_update_func.get(key) получает ссылку на функцию
+            # (val=data.get(key)) вызывает функцию со следующими аргументами data.get(key)
+            var_to_update_func.get(key)(val=data.get(key))
+
+    def update_defect_img_data(self, data: dict):
+        var_to_update_func = {'Defect': self.set_val_lcd_defect,
+                              'Pos_UZK': self.set_val_lcd_defect_place,
+                              'Defect_temperature': self.set_val_lcd_temperature}
+        for key in var_to_update_func:
+            # var_to_update_func словарь сопоставления имён переменных получаемых из data и функций куда
+            # их нужно передать для обновления. var_to_update_func.get(key) получает ссылку на функцию
+            # (val=data.get(key)) вызывает функцию со следующими аргументами data.get(key)
+            var_to_update_func.get(key)(val=data.get(key))
 
 
 def create_ui():
