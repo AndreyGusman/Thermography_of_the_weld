@@ -1,9 +1,6 @@
 import time
-
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib as mlp
 
 from src.config import Config
 from src.data_format import DataFormat
@@ -13,9 +10,6 @@ class Camera:
     def __init__(self):
         self.capture = None
         self.config = Config()
-        colors = ["blue", "green", "green", "red"]
-        nodes = [0.0, 0.5, 0.5, 1.0]
-        self.colormap = mlp.colors.LinearSegmentedColormap.from_list("mycmap", list(zip(nodes, colors)))  # 'inferno'
 
         self.current_plc_data = {}
         self.origin_img = None
@@ -94,11 +88,6 @@ class Camera:
         ret_dict['image'] = img
         return ret_dict
 
-    def color_img_to_the_colormap(self, img):
-        rgb_img = (self.colormap(img) * 2 ** 8).astype(np.uint8)[:, :, :3]
-
-        return rgb_img
-
     def create_data_frame_to_parquet(self):
         if self.config.PARQUET_MODE == 1:
             var_name_to_parquet = DataFormat.parquet_format_mode_1.copy()
@@ -149,46 +138,9 @@ def test_1():
             break
 
 
-def test_2():
-    test_camera = Camera()
-
-    test_camera.get_capture()
-    while True:
-        image = test_camera.get_img()
-        rgb_img = test_camera.color_img_to_the_colormap(image)
-        print(len(image.shape))
-        cv2.imshow('image', image)
-        cv2.imshow('heatmap', rgb_img)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            cv2.destroyAllWindows()
-            break
 
 
-def plot_examples(colormaps):
-    """
-    Helper function to plot data with associated colormap.
-    """
-    np.random.seed(19680801)
-    data = np.random.randn(30, 30)
-    n = len(colormaps)
-    fig, axs = plt.subplots(1, n, figsize=(n * 2 + 2, 3),
-                            constrained_layout=True, squeeze=False)
-    for [ax, cmap] in zip(axs.flat, colormaps):
-        psm = ax.pcolormesh(data, cmap=cmap, rasterized=True, vmin=-4, vmax=4)
-        fig.colorbar(psm, ax=ax)
-    plt.show()
-
-
-def test_colormap():
-    colors = ["blue", "green", "green", "red"]
-    cmap1 = mlp.colors.LinearSegmentedColormap.from_list("mycmap", colors)
-    nodes = [0.0, 0.2, 0.6, 1.0]
-    cmap2 = mlp.colors.LinearSegmentedColormap.from_list("mycmap", list(zip(nodes, colors)))
-
-    print(cmap2)
-    plot_examples([cmap1, cmap2])
 
 
 if __name__ == '__main__':
-    test_colormap()
+    pass

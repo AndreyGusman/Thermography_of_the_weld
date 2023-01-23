@@ -37,7 +37,7 @@ class Config:
     EPOCHS: int = 10
 
     # настройки работы с parquet
-    BUFFER_SIZE = 500
+    BUFFER_SIZE = 150
     WORKING_DIRECTORY: str = ""
 
     # настройки трансфокатора

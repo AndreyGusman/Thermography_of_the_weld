@@ -1,5 +1,5 @@
 import sys
-
+import numpy as np
 from PyQt5 import uic, QtGui
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, QDateTimeEdit,
@@ -7,11 +7,13 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, 
                              QFileSystemModel, QTreeView, QCheckBox, QLineEdit
                              )
 
+from src.interface.colorizer import Colorizer
 
+# TODO прописать чтение и отображение архивных записей
 class UI(QMainWindow):
     def __init__(self):
         super(UI, self).__init__()
-
+        self.colorizer = Colorizer()
         # Load the ui file
         uic.loadUi("resources/ui_res/HMI_rev2.ui", self)
 
@@ -234,7 +236,6 @@ class UI(QMainWindow):
         # return string
         return self.ftp_pass.text()
 
-
         # Cтраница трансфокатора
 
     def get_val_lcd_focus_delta(self):
@@ -253,19 +254,33 @@ class UI(QMainWindow):
             self.update_defect_img(data.get('broken_img'))
 
     def update_defect_img(self, data: dict):
-        pix = self.get_pix_map(data.pop('image'))
+        img = data.pop('image')
+        if self.get_main_screen_temperature() == 2:
+            img = self.colorizer.color_img_to_the_colormap(img)
+        pix = self.get_pix_map(img)
         self.l_NG_img.setPixmap(pix)
 
         self.update_defect_img_data(data)
 
-
     def update_current_img(self, data: dict):
-        pix = self.get_pix_map(data.pop('image'))
-        self.l_Current_img.setPixmap(pix)
+        img = data.pop('image')
+        if self.get_main_screen_temperature() == 2:
+            rgb_img = self.colorizer.color_img_to_the_colormap(img)
+            pix = self.get_pix_map(rgb_img)
+            self.l_Current_img.setPixmap(pix)
+        else:
+            pix = self.get_pix_map(img)
+            self.l_Current_img.setPixmap(pix)
 
-        self.l_Current_img_2.setPixmap(pix)
+        if self.get_transfocator_screen_temperature() == 2 and len(img.shape) == 2:
+            rgb_img = self.colorizer.color_img_to_the_colormap(img)
+            pix = self.get_pix_map(rgb_img)
+            self.l_Current_img_2.setPixmap(pix)
+        else:
+            pix = self.get_pix_map(img)
+            self.l_Current_img_2.setPixmap(pix)
+
         self.update_current_img_data(data)
-
 
     def get_pix_map(self, img):
         if len(img.shape) == 2:
@@ -284,9 +299,10 @@ class UI(QMainWindow):
 
     @staticmethod
     def get_pix_map_rgb_ch(img):
-        image = QtGui.QImage(img, img.shape[1],
-                             img.shape[0], img.shape[1] * 3, QtGui.QImage.Format.Format_RGB888)
-        pix = QtGui.QPixmap(image)
+        im_np = np.array(img)
+        q_image = QtGui.QImage(im_np.data, im_np.shape[1], im_np.shape[0],
+                               QtGui.QImage.Format_RGB888)
+        pix = QtGui.QPixmap(q_image)
         return pix
 
     def update_current_img_data(self, data: dict):

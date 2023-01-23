@@ -5,6 +5,7 @@ from src.config import Config
 from src.data_format import DataFormat
 
 
+# TODO прописать правила создания рабочей деректории DB(рабочая папка, разбиение по часам, формирование имён паркетных файлов)
 class ParquetWorker:
 
     def __init__(self):
@@ -49,7 +50,6 @@ class ParquetWorker:
                     self.data_buf_dict[key].append(0)
 
         self.len_data_buf_dict += 1
-        print(self.len_data_buf_dict)
         if self.len_data_buf_dict >= self.config.BUFFER_SIZE:
             print('start write parquet')
             start_time = time.time()
