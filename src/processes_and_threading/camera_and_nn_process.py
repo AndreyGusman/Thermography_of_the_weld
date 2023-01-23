@@ -1,5 +1,6 @@
 from ..camera import Camera
 from src.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
+from src.data_format import DataFormat
 
 import time
 import random
@@ -92,12 +93,16 @@ class CameraAndNNProcess(BaseProcess):
         # захватываем изображение с камеры
         self.camera.get_capture()
         self.create_logging_task(data='Camera capture create')
+        # ждём данных от plc
+        while self.camera.current_plc_data is None:
+            pass
         # пока есть разрешение считываем кадр с камеры и создаём задачи
         while self.b_create_task:
-            list_img = self.get_img_from_camera()
-            self.create_task(name='Show img', data=list_img, queue=self.queue_to_ui)
-            self.create_task(name='Write to parquet', data=self.create_task_to_write_parquet(list_img),
-                             queue=self.queue_to_parquet)
+            dict_img = self.get_img_from_camera()
+            self.create_task(name='Show img', data=dict_img, queue=self.queue_to_ui)
+
+            # self.create_task(name='Write to parquet', data=self.create_task_to_write_parquet(dict_img),
+            #                  queue=self.queue_to_parquet)
 
         self.create_logging_task(data='Camera stopped')
         # освобождаем камеру
@@ -114,19 +119,18 @@ class CameraAndNNProcess(BaseProcess):
                                                      b_queue_from_parquet_free)
 
     def get_img_from_camera(self):
-        ret_img = []
-        img = self.camera.get_img()
-        ret_img.append(img)
+        ret_dict = DataFormat.dict_camera_to_interface.copy()
+        ret_dict['current_img'] = self.camera.get_current_img_and_plc_data()
         if random.random() > 0.95:
-            ret_img.append(img)
-        return ret_img
+            ret_dict['broken_img'] = self.camera.test_get_broken_img_and_plc_data(ret_dict['current_img'].get('image'))
+        return ret_dict
 
     def create_task_to_write_parquet(self, img_list):
         img_to_parquet = list.copy(img_list)
         for i in range(len(img_to_parquet)):
             img_to_parquet[i] = self.camera.convert_img_to_one_row(img_to_parquet[i])
         if len(img_to_parquet) == 1:
-            img_to_parquet.append(np.zeros((1,1)))
+            img_to_parquet.append(np.zeros((1, 1)))
         # пока нет железа имитируем данные с ПЛК
         data_frame = [time.time(), random.randint(10, 10000), random.random(),
                       self.camera.config.OUT_FRAME_WIDTH * self.camera.config.OUT_FRAME_HEIGHT]

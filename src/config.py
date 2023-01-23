@@ -37,7 +37,6 @@ class Config:
     # настройки работы с parquet
     BUFFER_SIZE = 150
     WORKING_DIRECTORY: str = ""
-    TITTLE = ['Time', 'Length', 'defect', 'Size', 'Image', 'Defect image']
 
     # настройки трансфокатора
     TRANSFOCATOR_HOST: str = "192.168.0.100"

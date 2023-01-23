@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
-from src.config import Config
 import matplotlib.pyplot as plt
 import matplotlib as mlp
+
+from src.config import Config
+from src.data_format import DataFormat
 
 
 class Camera:
@@ -47,6 +49,7 @@ class Camera:
 
     def get_img(self):
         if self.capture is not None:
+
             if self.config.USE_NOTEBOOK_CAMERA:
                 _, bgr_img = self.capture.read()
                 self.gray_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
@@ -69,6 +72,19 @@ class Camera:
             return self.gray_img
         else:
             print('Подключение к камере не установлено.')
+
+    def get_current_img_and_plc_data(self):
+        var_name_current_img = DataFormat.var_name_current_img.copy()
+        img = self.get_img()
+        ret_dict = {var_name: self.current_plc_data.get(var_name) for var_name in var_name_current_img}
+        ret_dict['image'] = img
+        return ret_dict
+
+    def test_get_broken_img_and_plc_data(self, img):
+        var_name_broken_img = DataFormat.var_name_broken_img.copy()
+        ret_dict = {var_name: self.current_plc_data.get(var_name) for var_name in var_name_broken_img}
+        ret_dict['image'] = img
+        return ret_dict
 
     def color_img_to_the_colormap(self, img):
         rgb_img = (self.colormap(img) * 2 ** 8).astype(np.uint8)[:, :, :3]

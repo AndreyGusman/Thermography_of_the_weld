@@ -20,11 +20,26 @@ class DataFormat:
                'Reserve1': None, 'Reserve2': None, 'Reserve3': None, 'Reserve4': None, 'Reserve5': None,
                'Reserve6': None}
 
+    # выборка интовых переменных
     using_plc_var_name = ['Pos_UZK', 'RollersSpeedSet', 'RollersSpeedAkt', 'Diam', 'Part_Coil_UZK', 'Part_Coil_TOS',
                           'Count_Pipe', 'Length_Pipe', 'Num_Pipe', 'Pos_Begin_Cut', 'Num_Coil_UZK', 'Num_Coil_TOS']
 
+    # сопутствующие данные текущего кадра
+    var_name_current_img = ['image', 'Pos_UZK', 'RollersSpeedSet', 'RollersSpeedAkt', 'Diam']
+    # сопутствующие данные дефектного кадра
+    var_name_broken_img = ['image', 'Defect', 'Pos_UZK', 'RollersSpeedAkt', 'Defect_temperature']
 
+    # формат посылки интерфейсу от камеры, содержит картинку и сопутствующие данные
+    dict_camera_to_interface = {'current_img': None, 'broken_img': None}
 
+    # формат посылки записи паркета на этапе пуско-наладночных работ
+    parquet_format_first_stage = ['Time', 'Length', 'reserve zone 1', 'reserve zone 2', 'reserve zone 3',
+                                  'reserve zone 4', 'reserve zone 5', 'reserve zone 6', 'reserve zone 7',
+                                  'reserve zone 8', 'reserve zone 9', 'Image']
+
+    parquet_format = ['Time', 'Length', 'reserve zone 1', 'reserve zone 2', 'reserve zone 3',
+                      'reserve zone 4', 'reserve zone 5', 'reserve zone 6', 'reserve zone 7',
+                      'reserve zone 8', 'reserve zone 9', 'Image', 'Defect mask', 'type']
 
     # Формат чтения/записи трансфокатора transfocator.py
     toCamera = {'Zoom+': None, 'Zoom-': None, 'SetZoom': None, 'Focus+': None, 'Focus-': None, 'SetFocus': None,
