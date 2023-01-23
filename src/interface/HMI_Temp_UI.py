@@ -4,7 +4,7 @@ from PyQt5 import uic, QtGui
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, QDateTimeEdit,
                              QLCDNumber, QPushButton, QCalendarWidget, QSpinBox, QGroupBox, QScrollBar,
-                             QFileSystemModel, QTreeView
+                             QFileSystemModel, QTreeView, QCheckBox, QLineEdit
                              )
 
 
@@ -85,6 +85,19 @@ class UI(QMainWindow):
         self.B_Hour = self.findChild(QSpinBox, "B_Hour")
         self.B_Minute = self.findChild(QSpinBox, "B_Minute")
         self.B_Second = self.findChild(QSpinBox, "B_Second")
+        self.B_min_temp = self.findChild(QSpinBox, "B_min_temp")
+        self.B_max_temp = self.findChild(QSpinBox, "B_max_temp")
+
+        # CheckBox
+        self.check_arch = self.findChild(QCheckBox, "check_arch")
+        self.check_main_screen = self.findChild(QCheckBox, "check_main_screen")
+        self.check_transfocator = self.findChild(QCheckBox, "check_transfocator")
+
+        # LineEdit
+        self.ftp_ip = self.findChild(QLineEdit, "ftp_ip")
+        self.ftp_port = self.findChild(QLineEdit, "ftp_port")
+        self.ftp_login = self.findChild(QLineEdit, "ftp_login")
+        self.ftp_pass = self.findChild(QLineEdit, "ftp_pass")
 
         # TreeView
         self.T_Parquet = self.findChild(QTreeView, "T_Parquet")
@@ -176,6 +189,41 @@ class UI(QMainWindow):
 
     def get_val_lcd_frame_frequency(self):
         return self.lcd_frame_frequency.value()
+
+    def get_val_min_screen_temperature(self):
+        return self.B_min_temp.value()
+
+    def get_val_max_screen_temperature(self):
+        return self.B_max_temp.value()
+
+    def get_main_screen_temperature(self):
+        # return 0 - not checked; 2 - checked
+        return self.check_main_screen.checkState()
+
+    def get_transfocator_screen_temperature(self):
+        # return 0 - not checked; 2 - checked
+        return self.check_transfocator.checkState()
+
+    def get_arch_screen_temperature(self):
+        # return 0 - not checked; 2 - checked
+        return self.check_arch.checkState()
+
+    def get_ftp_ip(self):
+        # return string
+        return self.ftp_ip.text()
+
+    def get_ftp_port(self):
+        # return string
+        return self.ftp_port.text()
+
+    def get_ftp_login(self):
+        # return string
+        return self.ftp_login.text()
+
+    def get_ftp_pass(self):
+        # return string
+        return self.ftp_pass.text()
+
 
         # Cтраница трансфокатора
 
