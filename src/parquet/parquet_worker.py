@@ -1,11 +1,19 @@
+import os
 import time
+import datetime
 import pandas as pd
-
+from pathlib import Path
 from src.config import Config
 from src.data_format import DataFormat
 
 
 # TODO прописать правила создания рабочей деректории DB(рабочая папка, разбиение по часам, формирование имён паркетных файлов)
+
+while True:
+    directory = f"{datetime.datetime.now().year}/{datetime.datetime.now().month}/" \
+                f"{datetime.datetime.now().day}/{datetime.datetime.now().hour}"
+    Path(directory).mkdir(parents=True, exist_ok=True)
+
 class ParquetWorker:
 
     def __init__(self):
