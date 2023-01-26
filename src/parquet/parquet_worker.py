@@ -10,9 +10,10 @@ from src.data_format import DataFormat
 # TODO прописать правила создания рабочей деректории DB(рабочая папка, разбиение по часам, формирование имён паркетных файлов)
 
 while True:
-    directory = f"{datetime.datetime.now().year}/{datetime.datetime.now().month}/" \
+    file_path = f"{datetime.datetime.now().year}/{datetime.datetime.now().month}/" \
                 f"{datetime.datetime.now().day}/{datetime.datetime.now().hour}"
-    Path(directory).mkdir(parents=True, exist_ok=True)
+    Path(file_path).mkdir(parents=True, exist_ok=True)
+    file_name = str(datetime.datetime.now().strftime("%M") + ".parquet")
 
 class ParquetWorker:
 
