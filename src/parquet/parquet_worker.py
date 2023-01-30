@@ -49,13 +49,13 @@ class ParquetWorker:
             else:
                 # раскладываем картинку построчно
 
-                for line in range(512):
+                for line in range(self.config.WIDTH_IMAGE):
                     self.data_buf_dict[key].append(data[key][line])
 
         # выравниваем длину столбцов
         for key in self.data_buf_dict:
             if key != 'Image':
-                for i in range(511):
+                for i in range(self.config.WIDTH_IMAGE-1):
                     self.data_buf_dict[key].append(0)
 
         self.len_data_buf_dict += 1
@@ -74,22 +74,19 @@ class ParquetWorker:
         time_data = []
         zones_data = []
 
-        path_parq = "C:/Users/kosim/PycharmProjects/ModbusTCP/Parquet"
-        path_img = "C:/Users/kosim/PycharmProjects/ModbusTCP/New_images"
-
-        for i in range(0, int(((pd.read_parquet(parquet_file_name, columns=['Zones']).count()) / (WIDTH_IMAGE)))):
+        for i in range(0, int(((pd.read_parquet(parquet_file_name, columns=['Zones']).count()) / (self.config.WIDTH_IMAGE)))):
             df = pd.read_parquet((parquet_file_name), columns=['Zones', 'Time'])
-            time_data.append(df.iloc[i * WIDTH_IMAGE, 1])
+            time_data.append(df.iloc[i * self.config.WIDTH_IMAGE, 1])
             data_buf = []
             if i == 0:
                 j = 0
-                while j <= WIDTH_IMAGE:
+                while j <= self.config.WIDTH_IMAGE:
                     data_buf.append(df.iloc[j, 0])
                     j += 1
             else:
                 j = 1
-                while j <= (WIDTH_IMAGE + 1):
-                    data_buf.append(df.iloc[j + (i * WIDTH_IMAGE), 0])
+                while j <= (self.config.WIDTH_IMAGE + 1):
+                    data_buf.append(df.iloc[j + (i * self.config.WIDTH_IMAGE), 0])
                     j += 1
             np.array(zones_data.append((np.array(data_buf))))
             PIL.Image.fromarray(np.uint8((zones_data[i] * 255))).save(
