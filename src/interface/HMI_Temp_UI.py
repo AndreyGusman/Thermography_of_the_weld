@@ -1,17 +1,21 @@
 import sys
-
+import pathlib
+import numpy as np
 from PyQt5 import uic, QtGui
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, QDateTimeEdit,
                              QLCDNumber, QPushButton, QCalendarWidget, QSpinBox, QGroupBox, QScrollBar,
                              QFileSystemModel, QTreeView, QCheckBox, QLineEdit
                              )
+from pathlib import Path
+from src.interface.colorizer import Colorizer
 
 
+# TODO прописать чтение и отображение архивных записей
 class UI(QMainWindow):
     def __init__(self):
         super(UI, self).__init__()
-
+        self.colorizer = Colorizer()
         # Load the ui file
         uic.loadUi("resources/ui_res/HMI_rev2.ui", self)
 
@@ -76,7 +80,6 @@ class UI(QMainWindow):
         self.lcd_Focus_Delta = self.findChild(QLCDNumber, "lcd_Focus_Delta")
         self.lcd_Zoom_Delta = self.findChild(QLCDNumber, "lcd_Zoom_Delta")
 
-        self.lcd_frame_frequency = self.findChild(QLCDNumber, "lcd_frame_frequency")
 
         # CalendarWidget
         self.calendar = self.findChild(QCalendarWidget, "calendar")
@@ -87,6 +90,7 @@ class UI(QMainWindow):
         self.B_Second = self.findChild(QSpinBox, "B_Second")
         self.B_min_temp = self.findChild(QSpinBox, "B_min_temp")
         self.B_max_temp = self.findChild(QSpinBox, "B_max_temp")
+        self.lcd_frame_frequency = self.findChild(QSpinBox, "lcd_frame_frequency")
 
         # CheckBox
         self.check_arch = self.findChild(QCheckBox, "check_arch")
@@ -117,16 +121,6 @@ class UI(QMainWindow):
 
         # Show the App
         self.show()
-
-        # Обход корневого каталога
-        self.model = QFileSystemModel()
-        self.model.setRootPath(QDir.currentPath())
-        self.T_Parquet.setModel(self.model)
-        self.T_Parquet.setRootIndex(self.model.index('/'))
-        self.T_Parquet.doubleClicked.connect(self._on_double_clicked)
-        self.T_Parquet.setAnimated(False)
-        self.T_Parquet.setIndentation(20)
-        self.T_Parquet.setSortingEnabled(True)
 
     def set_status_profibus(self, net_status):
         if net_status:
@@ -164,7 +158,20 @@ class UI(QMainWindow):
         day = list[2]
         h = list[3]
         m = list[4]
-        print(year, month, day, h, m)
+        #print(year, month, day, h, m)
+        #составление пути к файлу
+        dir_path = str(pathlib.Path.home())
+        path = str(Path(dir_path, year, month, day, h))
+
+        # Обход каталога
+        self.model = QFileSystemModel()
+        self.model.setRootPath(QDir.rootPath())
+        self.T_Parquet.setModel(self.model)
+        self.T_Parquet.setRootIndex(self.model.index(path))
+        self.T_Parquet.doubleClicked.connect(self._on_double_clicked)
+        self.T_Parquet.setAnimated(False)
+        self.T_Parquet.setIndentation(20)
+        self.T_Parquet.setSortingEnabled(True)
 
         # Главная страница -> характеристики текущие (с профибаса)
 
@@ -234,7 +241,6 @@ class UI(QMainWindow):
         # return string
         return self.ftp_pass.text()
 
-
         # Cтраница трансфокатора
 
     def get_val_lcd_focus_delta(self):
@@ -244,7 +250,14 @@ class UI(QMainWindow):
         return self.lcd_Zoom_Delta.value()
 
     def _on_double_clicked(self):
-        pass
+        file_name = self.model.filePath(index)
+        # проверка раширения файла
+        if str(Path(file_name).suffix == '.parquet'):
+            #открываем файл паркет
+                pix = self.get_pix_map(img)
+                self.l_Arch_img.setPixmap(pix)
+        else:
+            pass
 
     def show_img_and_plc_data(self, data: dict):
         if data.get('current_img') is not None:
@@ -253,19 +266,33 @@ class UI(QMainWindow):
             self.update_defect_img(data.get('broken_img'))
 
     def update_defect_img(self, data: dict):
-        pix = self.get_pix_map(data.pop('image'))
+        img = data.pop('image')
+        if self.get_main_screen_temperature() == 2:
+            img = self.colorizer.color_img_to_the_colormap(img)
+        pix = self.get_pix_map(img)
         self.l_NG_img.setPixmap(pix)
 
         self.update_defect_img_data(data)
 
-
     def update_current_img(self, data: dict):
-        pix = self.get_pix_map(data.pop('image'))
-        self.l_Current_img.setPixmap(pix)
+        img = data.pop('image')
+        if self.get_main_screen_temperature() == 2:
+            rgb_img = self.colorizer.color_img_to_the_colormap(img)
+            pix = self.get_pix_map(rgb_img)
+            self.l_Current_img.setPixmap(pix)
+        else:
+            pix = self.get_pix_map(img)
+            self.l_Current_img.setPixmap(pix)
 
-        self.l_Current_img_2.setPixmap(pix)
+        if self.get_transfocator_screen_temperature() == 2 and len(img.shape) == 2:
+            rgb_img = self.colorizer.color_img_to_the_colormap(img)
+            pix = self.get_pix_map(rgb_img)
+            self.l_Current_img_2.setPixmap(pix)
+        else:
+            pix = self.get_pix_map(img)
+            self.l_Current_img_2.setPixmap(pix)
+
         self.update_current_img_data(data)
-
 
     def get_pix_map(self, img):
         if len(img.shape) == 2:
@@ -284,9 +311,10 @@ class UI(QMainWindow):
 
     @staticmethod
     def get_pix_map_rgb_ch(img):
-        image = QtGui.QImage(img, img.shape[1],
-                             img.shape[0], img.shape[1] * 3, QtGui.QImage.Format.Format_RGB888)
-        pix = QtGui.QPixmap(image)
+        im_np = np.array(img)
+        q_image = QtGui.QImage(im_np.data, im_np.shape[1], im_np.shape[0],
+                               QtGui.QImage.Format_RGB888)
+        pix = QtGui.QPixmap(q_image)
         return pix
 
     def update_current_img_data(self, data: dict):
