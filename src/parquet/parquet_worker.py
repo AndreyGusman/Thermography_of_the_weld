@@ -70,6 +70,31 @@ class ParquetWorker:
             return f'parquet writer need {time.time() - start_time}s for {self.config.BUFFER_SIZE} img'
         return None
 
+    def read_from_parquet_to_img(self, parquet_file_name: str = '', img_file_path: str = ''):
+        time_data = []
+        zones_data = []
+
+        path_parq = "C:/Users/kosim/PycharmProjects/ModbusTCP/Parquet"
+        path_img = "C:/Users/kosim/PycharmProjects/ModbusTCP/New_images"
+
+        for i in range(0, int(((pd.read_parquet(parquet_file_name, columns=['Zones']).count()) / (WIDTH_IMAGE)))):
+            df = pd.read_parquet((parquet_file_name), columns=['Zones', 'Time'])
+            time_data.append(df.iloc[i * WIDTH_IMAGE, 1])
+            data_buf = []
+            if i == 0:
+                j = 0
+                while j <= WIDTH_IMAGE:
+                    data_buf.append(df.iloc[j, 0])
+                    j += 1
+            else:
+                j = 1
+                while j <= (WIDTH_IMAGE + 1):
+                    data_buf.append(df.iloc[j + (i * WIDTH_IMAGE), 0])
+                    j += 1
+            np.array(zones_data.append((np.array(data_buf))))
+            PIL.Image.fromarray(np.uint8((zones_data[i] * 255))).save(
+                os.path.join(img_file_path, ("IMG" + str(i) + ((time_data[i].replace(':', '')) + '.PNG'))))
+
     def config_data_buf(self):
         if self.config.PARQUET_MODE == 1:
             var_name_list = DataFormat.parquet_format_mode_1.copy()
