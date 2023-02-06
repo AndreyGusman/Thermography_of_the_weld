@@ -1,4 +1,6 @@
 import sys
+import pathlib
+
 import numpy as np
 from PyQt5 import uic, QtGui
 from PyQt5.QtCore import QDir
@@ -6,6 +8,8 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, 
                              QLCDNumber, QPushButton, QCalendarWidget, QSpinBox,QDoubleSpinBox, QGroupBox, QScrollBar,
                              QFileSystemModel, QTreeView, QCheckBox, QLineEdit
                              )
+from pathlib import Path
+from src.interface.colorizer import Colorizer
 
 from src.interface.colorizer import Colorizer
 
@@ -79,7 +83,6 @@ class UI(QMainWindow):
         self.lcd_Focus_Delta = self.findChild(QLCDNumber, "lcd_Focus_Delta")
         self.lcd_Zoom_Delta = self.findChild(QLCDNumber, "lcd_Zoom_Delta")
 
-        self.lcd_frame_frequency = self.findChild(QLCDNumber, "lcd_frame_frequency")
 
         # CalendarWidget
         self.calendar = self.findChild(QCalendarWidget, "calendar")
@@ -88,6 +91,9 @@ class UI(QMainWindow):
         self.B_Hour = self.findChild(QSpinBox, "B_Hour")
         self.B_Minute = self.findChild(QSpinBox, "B_Minute")
         self.B_Second = self.findChild(QSpinBox, "B_Second")
+
+        self.lcd_frame_frequency = self.findChild(QSpinBox, "lcd_frame_frequency")
+
         self.B_min_temp = self.findChild(QDoubleSpinBox, "B_min_temp")
         self.B_max_temp = self.findChild(QDoubleSpinBox, "B_max_temp")
 
@@ -124,15 +130,7 @@ class UI(QMainWindow):
         # Show the App
         self.show()
 
-        # Обход корневого каталога
-        self.model = QFileSystemModel()
-        self.model.setRootPath(QDir.currentPath())
-        self.T_Parquet.setModel(self.model)
-        self.T_Parquet.setRootIndex(self.model.index('/'))
-        self.T_Parquet.doubleClicked.connect(self._on_double_clicked)
-        self.T_Parquet.setAnimated(False)
-        self.T_Parquet.setIndentation(20)
-        self.T_Parquet.setSortingEnabled(True)
+
 
     def update_val_min_temp(self):
         self.colorizer.min_temperature = self.B_min_temp.value()
@@ -179,7 +177,20 @@ class UI(QMainWindow):
         day = list[2]
         h = list[3]
         m = list[4]
-        print(year, month, day, h, m)
+        #print(year, month, day, h, m)
+        #составление пути к файлу
+        dir_path = str(pathlib.Path.home())
+        path = str(Path(dir_path, year, month, day, h))
+
+        # Обход каталога
+        self.model = QFileSystemModel()
+        self.model.setRootPath(QDir.rootPath())
+        self.T_Parquet.setModel(self.model)
+        self.T_Parquet.setRootIndex(self.model.index(path))
+        self.T_Parquet.doubleClicked.connect(self._on_double_clicked)
+        self.T_Parquet.setAnimated(False)
+        self.T_Parquet.setIndentation(20)
+        self.T_Parquet.setSortingEnabled(True)
 
         # Главная страница -> характеристики текущие (с профибаса)
 
@@ -258,7 +269,14 @@ class UI(QMainWindow):
         return self.lcd_Zoom_Delta.value()
 
     def _on_double_clicked(self):
-        pass
+        file_name = self.model.filePath(index)
+        # проверка раширения файла
+        if str(Path(file_name).suffix == '.parquet'):
+            #открываем файл паркет
+                pix = self.get_pix_map(img)
+                self.l_Arch_img.setPixmap(pix)
+        else:
+            pass
 
     def show_img_and_plc_data(self, data: dict):
         if data.get('current_img') is not None:
