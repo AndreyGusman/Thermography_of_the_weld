@@ -1,13 +1,16 @@
 import sys
 import pathlib
+
 import numpy as np
 from PyQt5 import uic, QtGui
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, QDateTimeEdit,
-                             QLCDNumber, QPushButton, QCalendarWidget, QSpinBox, QGroupBox, QScrollBar,
+                             QLCDNumber, QPushButton, QCalendarWidget, QSpinBox,QDoubleSpinBox, QGroupBox, QScrollBar,
                              QFileSystemModel, QTreeView, QCheckBox, QLineEdit
                              )
 from pathlib import Path
+from src.interface.colorizer import Colorizer
+
 from src.interface.colorizer import Colorizer
 
 
@@ -88,9 +91,12 @@ class UI(QMainWindow):
         self.B_Hour = self.findChild(QSpinBox, "B_Hour")
         self.B_Minute = self.findChild(QSpinBox, "B_Minute")
         self.B_Second = self.findChild(QSpinBox, "B_Second")
-        self.B_min_temp = self.findChild(QSpinBox, "B_min_temp")
-        self.B_max_temp = self.findChild(QSpinBox, "B_max_temp")
+
         self.lcd_frame_frequency = self.findChild(QSpinBox, "lcd_frame_frequency")
+
+        self.B_min_temp = self.findChild(QDoubleSpinBox, "B_min_temp")
+        self.B_max_temp = self.findChild(QDoubleSpinBox, "B_max_temp")
+
 
         # CheckBox
         self.check_arch = self.findChild(QCheckBox, "check_arch")
@@ -118,9 +124,22 @@ class UI(QMainWindow):
         self.btn_Transf.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(1))
         self.btn_Arch.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(3))
         self.btn_Set_DT.clicked.connect(self.set_DT)
+        self.B_min_temp.valueChanged.connect(self.update_val_min_temp)
+        self.B_max_temp.valueChanged.connect(self.update_val_max_temp)
 
         # Show the App
         self.show()
+
+
+
+    def update_val_min_temp(self):
+        self.colorizer.min_temperature = self.B_min_temp.value()
+        print(self.B_min_temp.value())
+        self.colorizer.create_colormap()
+
+    def update_val_max_temp(self):
+        self.colorizer.max_temperature = self.B_max_temp.value()
+        self.colorizer.create_colormap()
 
     def set_status_profibus(self, net_status):
         if net_status:
