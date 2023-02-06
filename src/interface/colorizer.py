@@ -22,7 +22,7 @@ class Colorizer:
             rgb_img = (self.current_colormap(img) * 2 ** 8).astype(np.uint8)[:, :, :3]
         return rgb_img
 
-    # TODO привязать создание цветовой карты к интерфейсу
+
     def create_colormap(self):
         if self.max_temperature >= self.min_temperature:
             self.nodes = [0.0, self.min_temperature, self.max_temperature, 1.0]

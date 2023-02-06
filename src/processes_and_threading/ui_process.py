@@ -90,7 +90,7 @@ class UIProcess(BaseProcess):
         self.thread_work_with_task.start()
         self.create_logging_task(data='UI create')
         # блокирующий оператор, функция равершается при закрытии окна ui
-        sys.exit(self.app.exec_())
+        sys.exit(self.app.exec())
 
     # задача потока работы с каналами связи
     def work_with_pipe(self):

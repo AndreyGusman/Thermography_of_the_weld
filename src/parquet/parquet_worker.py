@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 import pandas as pd
+import numpy as np
 from pathlib import Path
 from src.config import Config
 from src.data_format import DataFormat
@@ -9,11 +10,6 @@ from src.data_format import DataFormat
 
 # TODO прописать правила создания рабочей деректории DB(рабочая папка, разбиение по часам, формирование имён паркетных файлов)
 
-while True:
-    file_path = f"{datetime.datetime.now().year}/{datetime.datetime.now().month}/" \
-                f"{datetime.datetime.now().day}/{datetime.datetime.now().hour}"
-    Path(file_path).mkdir(parents=True, exist_ok=True)
-    file_name = str(datetime.datetime.now().strftime("%M") + ".parquet")
 
 class ParquetWorker:
 
@@ -55,7 +51,7 @@ class ParquetWorker:
         # выравниваем длину столбцов
         for key in self.data_buf_dict:
             if key != 'Image':
-                for i in range(self.config.WIDTH_IMAGE-1):
+                for i in range(self.config.WIDTH_IMAGE - 1):
                     self.data_buf_dict[key].append(0)
 
         self.len_data_buf_dict += 1
@@ -77,7 +73,7 @@ class ParquetWorker:
         time_dt = []
 
         df = pd.read_parquet((parquet_file_name), columns=['Time', 'Length', 'Pos_UZK'])
-        number_frames = int(len(df.index)/ (640))
+        number_frames = int(len(df.index) / (640))
         time_first_frame = df.iloc[0, 0]
         time_last_frame = df.iloc[number_frames, 0]
         length_first_frame = df.iloc[0, 1]
@@ -86,11 +82,8 @@ class ParquetWorker:
         pos_UZK_last_frame = df.iloc[number_frames, 2]
         print()
 
-
-
-
-
-        for i in range(0, int(((pd.read_parquet(parquet_file_name, columns=['Zones']).count()) / (self.config.WIDTH_IMAGE)))):
+        for i in range(0, int(((pd.read_parquet(parquet_file_name, columns=['Zones']).count()) / (
+                self.config.WIDTH_IMAGE)))):
             df = pd.read_parquet((parquet_file_name), columns=['Zones', 'Time'])
             time_data.append(df.iloc[i * self.config.WIDTH_IMAGE, 1])
             data_buf = []
@@ -105,8 +98,6 @@ class ParquetWorker:
                     data_buf.append(df.iloc[j + (i * self.config.WIDTH_IMAGE), 0])
                     j += 1
             np.array(zones_data.append((np.array(data_buf))))
-            PIL.Image.fromarray(np.uint8((zones_data[i] * 255))).save(
-                os.path.join(img_file_path, ("IMG" + str(i) + ((time_data[i].replace(':', '')) + '.PNG'))))
 
     def config_data_buf(self):
         if self.config.PARQUET_MODE == 1:
@@ -118,6 +109,12 @@ class ParquetWorker:
         if self.config.PARQUET_MODE == 3:
             var_name_list = DataFormat.parquet_format_mode_3.copy()
             self.data_buf_dict = {var_name: [] for var_name in var_name_list}
+
+    def create_work_folder(self):
+        file_path = f"{datetime.datetime.now().year}/{datetime.datetime.now().month}/" \
+                    f"{datetime.datetime.now().day}/{datetime.datetime.now().hour}"
+        Path(file_path).mkdir(parents=True, exist_ok=True)
+        file_name = str(datetime.datetime.now().strftime("%M") + ".parquet")
 
 
 if __name__ == '__main__':
