@@ -71,8 +71,24 @@ class ParquetWorker:
         return None
 
     def read_from_parquet_to_img(self, parquet_file_name: str = '', img_file_path: str = ''):
+
         time_data = []
         zones_data = []
+        time_dt = []
+
+        df = pd.read_parquet((parquet_file_name), columns=['Time', 'Length', 'Pos_UZK'])
+        number_frames = int(len(df.index)/ (640))
+        time_first_frame = df.iloc[0, 0]
+        time_last_frame = df.iloc[number_frames, 0]
+        length_first_frame = df.iloc[0, 1]
+        length_last_frame = df.iloc[number_frames, 1]
+        pos_UZK_first_frame = df.iloc[0, 2]
+        pos_UZK_last_frame = df.iloc[number_frames, 2]
+        print()
+
+
+
+
 
         for i in range(0, int(((pd.read_parquet(parquet_file_name, columns=['Zones']).count()) / (self.config.WIDTH_IMAGE)))):
             df = pd.read_parquet((parquet_file_name), columns=['Zones', 'Time'])
