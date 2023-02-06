@@ -45,7 +45,9 @@ class Config:
     TRANSFOCATOR_SLAVE: int = 1
     TRANSFOCATOR_PORT: int = 502
 
-    # настройки трансфокатора
+    # настройки profibus
     PROFIBUS_HOST: str = "192.168.0.100"
     PROFIBUS_SLAVE: int = 1
     PROFIBUS_PORT: int = 502
+
+    WIDTH_IMAGE = 512
