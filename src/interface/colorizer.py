@@ -29,7 +29,6 @@ class Colorizer:
             self.current_colormap = mlp.colors.LinearSegmentedColormap.from_list("default_colormap",
                                                                                  list(zip(self.nodes,
                                                                                           self.colors)))
-            print("Update colormap")
 
 def plot_examples(colormaps):
     """

@@ -85,10 +85,12 @@ class UIProcess(BaseProcess):
 
     # задача потока работы с обьектом (создание и отслеживание действий на экране)
     def work_with_object(self):
-        self.app, self.ui_window = create_ui()
-        self.thread_work_with_pipe.start()
-        self.thread_work_with_task.start()
+        self.app, self.ui_window = create_ui(self)
         self.create_logging_task(data='UI create')
+        self.thread_work_with_task.start()
+
+        self.thread_work_with_pipe.start()
+
         # блокирующий оператор, функция равершается при закрытии окна ui
         sys.exit(self.app.exec())
 
@@ -156,6 +158,9 @@ class UIProcess(BaseProcess):
             self.b_work = False
         else:
             self.create_logging_task(data=f'Ui process default task  solution is not defined, task name {name}')
+
+    def get_parquet_file(self, file_name):
+        self.create_task(name='Request parquet file', data=file_name, queue=self.queue_to_parquet)
 
 
 if __name__ == '__main__':

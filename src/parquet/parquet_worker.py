@@ -81,21 +81,28 @@ class ParquetWorker:
             # return f'parquet writer need {time.time() - start_time}s for {self.config.BUFFER_SIZE} img'
         return None
 
+    def get_parquet_file_metadata(self, parquet_file_name):
+        print(f"запрос получен открываю файл {parquet_file_name}")
+        df = pd.read_parquet(parquet_file_name, columns=['Time', 'Length', 'Pos_UZK'])
+        number_frames = int(len(df.index) / (512))
+        time_first_frame = df.iloc[0, 0]
+        time_last_frame = df.iloc[512*(number_frames-1), 0]
+        length_first_frame = df.iloc[0, 1]
+        length_last_frame = df.iloc[512*(number_frames-1), 1]
+        pos_UZK_first_frame = df.iloc[0, 2]
+        pos_UZK_last_frame = df.iloc[512*(number_frames-1), 2]
+        print(time_first_frame, time_last_frame, length_first_frame, length_last_frame, pos_UZK_first_frame,
+              pos_UZK_last_frame)
+        # print(number_frames)
+
+    def get_img_and_data_from_parquet(self):
+        pass
+
     def read_from_parquet_to_img(self, parquet_file_name: str = ''):
 
         time_data = []
         zones_data = []
         time_dt = []
-
-        df = pd.read_parquet((parquet_file_name), columns=['Time', 'Length', 'Pos_UZK'])
-        number_frames = int(len(df.index) / (640))
-        time_first_frame = df.iloc[0, 0]
-        time_last_frame = df.iloc[number_frames, 0]
-        length_first_frame = df.iloc[0, 1]
-        length_last_frame = df.iloc[number_frames, 1]
-        pos_UZK_first_frame = df.iloc[0, 2]
-        pos_UZK_last_frame = df.iloc[number_frames, 2]
-        print()
 
         for i in range(0, int(((pd.read_parquet(parquet_file_name, columns=['Zones']).count()) / (
                 self.config.WIDTH_IMAGE)))):

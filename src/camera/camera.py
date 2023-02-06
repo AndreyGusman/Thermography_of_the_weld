@@ -19,8 +19,10 @@ class Camera:
         self.calculated_frame_coordinate = None
 
     def get_capture(self):
-        self.capture = cv2.VideoCapture(self.config.CAMERA_NAME)
-
+        try:
+            self.capture = cv2.VideoCapture(self.config.CAMERA_NAME)
+        except Exception:
+            print("неудалось подключиться к камере")
         return self.capture
 
     def rotation_img(self):

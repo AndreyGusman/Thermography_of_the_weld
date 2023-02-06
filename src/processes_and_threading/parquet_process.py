@@ -141,8 +141,8 @@ class ParquetProcess(BaseProcess):
 
     def from_ui_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
-        if name == 'next task':
-            pass
+        if name == 'Request parquet file':
+            self.parquet_worker.get_parquet_file_metadata(data)
         elif name == 'next task':
             pass
         else:
