@@ -1,6 +1,7 @@
 import time
 import cv2
 import numpy as np
+import datetime
 
 from src.config import Config
 from src.data_format import DataFormat
@@ -54,8 +55,11 @@ class Camera:
                 self.gray_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
             else:
                 self.gray_img = self.capture.read()
-
             self.time_last_img = time.time()
+
+            # self.time_last_img = (
+            #     f"{datetime.datetime.now().minute}:{datetime.datetime.now().second}:{datetime.datetime.now().microsecond}")
+
             self.calculated_frame_coordinate = self.current_plc_data.get('Pos_UZK')
 
             if self.config.ROTATION_ANGLE:
@@ -136,10 +140,6 @@ def test_1():
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cv2.destroyAllWindows()
             break
-
-
-
-
 
 
 if __name__ == '__main__':

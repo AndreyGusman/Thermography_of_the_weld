@@ -3,8 +3,6 @@ class Config:
     PIPE_TIMEOUT = -0.001
     TASK_EXECUTOR_TIMEOUT = 0.01
     SEND_RECEIVE_TIME_LIMIT = 1
-    PARQUET_MODE = 1  # 1 - первый этап без нейросети, 2 - второй этап с нейросетью
-    # , 3 - нейросеть + классификатор дефектов
 
     # константы камеры
     USE_NOTEBOOK_CAMERA: bool = True  # тестовый режим камеры
@@ -37,8 +35,11 @@ class Config:
     EPOCHS: int = 10
 
     # настройки работы с parquet
-    BUFFER_SIZE = 150
-    WORKING_DIRECTORY: str = ""
+    BUFFER_SIZE = 10
+    WORKING_DIRECTORY: str = "C:/Users/Equint/PycharmProjects/thermography_of_the_weld/db"
+    PARQUET_MODE = 1  # 1 - первый этап без нейросети, 2 - второй этап с нейросетью
+    # , 3 - нейросеть + классификатор дефектов
+
 
     # настройки трансфокатора
     TRANSFOCATOR_HOST: str = "192.168.0.100"

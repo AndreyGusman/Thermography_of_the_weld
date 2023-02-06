@@ -14,11 +14,18 @@ from src.data_format import DataFormat
 class ParquetWorker:
 
     def __init__(self):
+        # собственный экземпляр конфига
+        self.config = Config()
+
+        # путь
+        self.file_path = None
+        self.file_name = None
+
+        # буфер для записи
         self.data_buf_list = []
         self.len_data_buf_list = 0
         self.data_buf_dict = {}
         self.len_data_buf_dict = 0
-        self.config = Config()
         self.config_data_buf()
 
     def write_to_parquet_from_list(self, data: list, title: list, parquet_file_path: str = '',
@@ -36,8 +43,7 @@ class ParquetWorker:
             return f'parquet writer need {time.time() - start_time}s for {self.config.BUFFER_SIZE} img'
         return None
 
-    def write_to_parquet_from_dict(self, data: dict, parquet_file_path: str = '',
-                                   parquet_file_name: str = 'db.parquet'):
+    def write_to_parquet_from_dict(self, data: dict):
         # записываем входящие значения
         for key in data:
             if key != 'Image':
@@ -56,17 +62,26 @@ class ParquetWorker:
 
         self.len_data_buf_dict += 1
         if self.len_data_buf_dict >= self.config.BUFFER_SIZE:
-            print('start write parquet')
-            start_time = time.time()
+            self.create_work_folder()
+            self.create_file_name(self.data_buf_dict.get('Time')[0],
+                                  self.data_buf_dict.get('Time')[-self.config.OUT_FRAME_HEIGHT])
+
+            # print('start write parquet')
+            # start_time = time.time()
+
             self.len_data_buf_dict = 0
+
             df = pd.DataFrame.from_dict(data=self.data_buf_dict, orient='columns')
-            df.to_parquet(f"{self.config.WORKING_DIRECTORY}{parquet_file_path}{parquet_file_name}")
             self.data_buf_dict.clear()
+
+            df.to_parquet(rf"{self.file_path}/{self.file_name}")
+
             self.config_data_buf()
-            return f'parquet writer need {time.time() - start_time}s for {self.config.BUFFER_SIZE} img'
+            return None
+            # return f'parquet writer need {time.time() - start_time}s for {self.config.BUFFER_SIZE} img'
         return None
 
-    def read_from_parquet_to_img(self, parquet_file_name: str = '', img_file_path: str = ''):
+    def read_from_parquet_to_img(self, parquet_file_name: str = ''):
 
         time_data = []
         zones_data = []
@@ -111,10 +126,12 @@ class ParquetWorker:
             self.data_buf_dict = {var_name: [] for var_name in var_name_list}
 
     def create_work_folder(self):
-        file_path = f"{datetime.datetime.now().year}/{datetime.datetime.now().month}/" \
-                    f"{datetime.datetime.now().day}/{datetime.datetime.now().hour}"
-        Path(file_path).mkdir(parents=True, exist_ok=True)
-        file_name = str(datetime.datetime.now().strftime("%M") + ".parquet")
+        self.file_path = f"{self.config.WORKING_DIRECTORY}/{datetime.datetime.now().year}/{datetime.datetime.now().month}/" \
+                         f"{datetime.datetime.now().day}/{datetime.datetime.now().hour}"
+        Path(self.file_path).mkdir(parents=True, exist_ok=True)
+
+    def create_file_name(self, start_time, end_time):
+        self.file_name = f"{datetime.datetime.fromtimestamp(start_time).strftime('%M-%S')}-{datetime.datetime.fromtimestamp(end_time).strftime('%M-%S')}.parquet"
 
 
 if __name__ == '__main__':
