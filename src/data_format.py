@@ -45,6 +45,9 @@ class DataFormat:
                              'Count_Pipe', 'Length_Pipe', 'Num_Pipe', 'Num_Coil_UZK',
                              'reserve zone 1', 'reserve zone 2', 'Image', 'Image', 'Defect mask', 'type']
 
+    parquet_metadata = ['number_frames', 'time_first_frame', 'time_last_frame', 'length_first_frame',
+                        'length_last_frame', 'pos_UZK_first_frame', 'pos_UZK_last_frame']
+
     # Формат чтения/записи трансфокатора transfocator.py
     toCamera = {'Zoom+': None, 'Zoom-': None, 'SetZoom': None, 'Focus+': None, 'Focus-': None, 'SetFocus': None,
                 'DiagOFF': None, 'DiagON': None}

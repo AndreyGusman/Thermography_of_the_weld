@@ -13,13 +13,18 @@ from src.data_format import DataFormat
 
 class ParquetWorker:
 
-    def __init__(self):
+    def __init__(self, process_reference):
         # собственный экземпляр конфига
-        self.config = Config()
 
+        self.current_frame = None
+        self.req_file_number_frames = None
+        self.req_file_df = None
+        self.config = Config()
+        self.process_reference = process_reference
         # путь
         self.file_path = None
         self.file_name = None
+        self.request_file = None
 
         # буфер для записи
         self.data_buf_list = []
@@ -82,21 +87,35 @@ class ParquetWorker:
         return None
 
     def get_parquet_file_metadata(self, parquet_file_name):
+        self.request_file = parquet_file_name
         print(f"запрос получен открываю файл {parquet_file_name}")
-        df = pd.read_parquet(parquet_file_name, columns=['Time', 'Length', 'Pos_UZK'])
-        number_frames = int(len(df.index) / (512))
-        time_first_frame = df.iloc[0, 0]
-        time_last_frame = df.iloc[512*(number_frames-1), 0]
-        length_first_frame = df.iloc[0, 1]
-        length_last_frame = df.iloc[512*(number_frames-1), 1]
-        pos_UZK_first_frame = df.iloc[0, 2]
-        pos_UZK_last_frame = df.iloc[512*(number_frames-1), 2]
-        print(time_first_frame, time_last_frame, length_first_frame, length_last_frame, pos_UZK_first_frame,
-              pos_UZK_last_frame)
-        # print(number_frames)
+        self.req_file_df = pd.read_parquet(parquet_file_name)
+        self.req_file_number_frames = int(len(self.req_file_df.index) / self.config.OUT_FRAME_HEIGHT)
+        time_first_frame = self.req_file_df.iloc[0, 0]
+        time_last_frame = self.req_file_df.iloc[self.config.OUT_FRAME_HEIGHT * (self.req_file_number_frames - 1), 0]
+        length_first_frame = self.req_file_df.iloc[0, 1]
+        length_last_frame = self.req_file_df.iloc[self.config.OUT_FRAME_HEIGHT * (self.req_file_number_frames - 1), 1]
+        pos_uzk_first_frame = self.req_file_df.iloc[0, 2]
+        pos_uzk_last_frame = self.req_file_df.iloc[self.config.OUT_FRAME_HEIGHT * (self.req_file_number_frames - 1), 2]
+        ret_dict = {'number_frames': self.req_file_number_frames, 'time_first_frame': time_first_frame,
+                    'time_last_frame': time_last_frame, 'length_first_frame': length_first_frame,
+                    'length_last_frame': length_last_frame, 'pos_UZK_first_frame': pos_uzk_first_frame,
+                    'pos_UZK_last_frame': pos_uzk_last_frame}
+        self.current_frame = 0
+        self.process_reference.ret_parquet_file_metadata(ret_dict)
 
     def get_img_and_data_from_parquet(self):
-        pass
+        ret_dict = {'Image id': None, 'Image': None, 'That is all': False}
+        image = self.req_file_df['Image'].iloc[self.current_frame * 512:self.current_frame * 512 + 512].values
+        self.current_frame += 1
+        ret_dict['Image id'] = self.current_frame
+        ret_dict['Image'] = image
+        if self.current_frame < self.req_file_number_frames:
+            ret_dict['That is all'] = False
+            return ret_dict
+        else:
+            ret_dict['That is all'] = True
+            return ret_dict
 
     def read_from_parquet_to_img(self, parquet_file_name: str = ''):
 

@@ -11,7 +11,7 @@ class ParquetProcess(BaseProcess):
         super().__init__(pipe_to_main)
 
         # инициализация рабочего объекта
-        self.parquet_worker = ParquetWorker()
+        self.parquet_worker = ParquetWorker(self)
         self.transfocator = SettingCamera()
         self.profibus = Profibus()
 
@@ -56,6 +56,8 @@ class ParquetProcess(BaseProcess):
         self.b_pipe_free = False
         self.b_queue_free = False
         self.b_create_task = True
+        self.b_req_file_close = False
+        self.gen_img_data = None
 
     def run(self):
         self.action()
@@ -119,6 +121,12 @@ class ParquetProcess(BaseProcess):
                 self.create_task(name='Update plc data', data=self.profibus.get_plc_data(),
                                  queue=self.queue_to_camera)
 
+            if self.b_req_file_close:
+                img_data = self.parquet_worker.get_img_and_data_from_parquet()
+                self.b_req_file_close = not img_data.get('That is all')
+                print(img_data.get('Image id'))
+                    # self.create_task(name='Image from parquet file', data=img, queue=self.queue_to_ui)
+
     # задача потока работы с задачами
     def work_with_task(self):
         while self.b_work or not self.b_pipe_free or not self.b_queue_free:
@@ -171,6 +179,10 @@ class ParquetProcess(BaseProcess):
             self.b_create_task = False
         else:
             self.create_logging_task(data=f'Parquet process default task  solution is not defined, task name {name}')
+
+    def ret_parquet_file_metadata(self, metadata: dict):
+        self.create_task(name='Metadata from parquet', data=metadata, queue=self.queue_to_ui)
+        self.b_req_file_close = True
 
 
 if __name__ == "__main__":
