@@ -92,7 +92,8 @@ class UIProcess(BaseProcess):
         self.thread_work_with_pipe.start()
 
         # блокирующий оператор, функция равершается при закрытии окна ui
-        sys.exit(self.app.exec())
+        res = sys.exit(self.app.exec())
+        print(f'Выход из интерфейса, с кодом {res}')
 
     # задача потока работы с каналами связи
     def work_with_pipe(self):

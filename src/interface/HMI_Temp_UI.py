@@ -19,11 +19,12 @@ from ..config import Config
 class UI(QMainWindow):
     def __init__(self, process_reference):
         super(UI, self).__init__()
+        # Load the ui file
+        uic.loadUi("resources/ui_res/HMI_rev2.ui", self)
+
         self.colorizer = Colorizer()
         self.parquet_viewer = ParquetViewer(self)
         self.process_reference = process_reference
-        # Load the ui file
-        uic.loadUi("resources/ui_res/HMI_rev2.ui", self)
 
         self.selected_file_path = None
         # Определение виджетов
@@ -116,8 +117,7 @@ class UI(QMainWindow):
         # TreeView
         self.T_Parquet = self.findChild(QTreeView, "T_Parquet")
 
-        # ScrollBar
-        self.ScrollBar_Parquet = self.findChild(QScrollBar, "ScrollBar_Parquet")
+
 
         # DateTimeEdit
         self.dateTimeArch = self.findChild(QDateTimeEdit, "dateTimeArch")
@@ -273,8 +273,7 @@ class UI(QMainWindow):
 
     def _on_double_clicked(self):
         index = self.T_Parquet.currentIndex()
-        self.selected_file_path = self.model.filePath(index)
-        self.process_reference.get_parquet_file(self.selected_file_path)
+        self.process_reference.get_parquet_file(self.model.filePath(index))
 
     def show_img_and_plc_data(self, data: dict):
         if data.get('current_img') is not None:
