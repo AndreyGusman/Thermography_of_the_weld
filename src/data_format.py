@@ -43,7 +43,7 @@ class DataFormat:
 
     parquet_format_mode_3 = ['Time', 'Length', 'Pos_UZK', 'Part_Coil_UZK', 'Part_Coil_TOS',
                              'Count_Pipe', 'Length_Pipe', 'Num_Pipe', 'Num_Coil_UZK',
-                             'reserve zone 1', 'reserve zone 2', 'Image', 'Image', 'Defect mask', 'type']
+                             'reserve zone 1', 'reserve zone 2', 'Image', 'Defect mask', 'type']
 
     parquet_metadata = ['number_frames', 'time_first_frame', 'time_last_frame', 'length_first_frame',
                         'length_last_frame', 'pos_UZK_first_frame', 'pos_UZK_last_frame']

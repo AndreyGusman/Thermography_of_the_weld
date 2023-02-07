@@ -8,7 +8,9 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, 
                              )
 
 from src.interface.colorizer import Colorizer
+from src.interface.parquet_viewer import ParquetViewer
 from ..config import Config
+
 
 # from src.processes_and_threading.ui_process import UIProcess
 
@@ -18,6 +20,7 @@ class UI(QMainWindow):
     def __init__(self, process_reference):
         super(UI, self).__init__()
         self.colorizer = Colorizer()
+        self.parquet_viewer = ParquetViewer(self)
         self.process_reference = process_reference
         # Load the ui file
         uic.loadUi("resources/ui_res/HMI_rev2.ui", self)
@@ -279,6 +282,15 @@ class UI(QMainWindow):
         if data.get('broken_img') is not None:
             self.update_defect_img(data.get('broken_img'))
 
+    def update_arch_img(self, data: dict):
+        img = data.pop('Image')
+        if self.get_transfocator_screen_temperature() == 2:
+            img = self.colorizer.color_img_to_the_colormap(img)
+        pix = self.get_pix_map(img)
+        self.l_Arch_img.setPixmap(pix)
+
+        self.update_arch_img_data(data)
+
     def update_defect_img(self, data: dict):
         img = data.pop('image')
         if self.get_main_screen_temperature() == 2:
@@ -351,6 +363,9 @@ class UI(QMainWindow):
             # их нужно передать для обновления. var_to_update_func.get(key) получает ссылку на функцию
             # (val=data.get(key)) вызывает функцию со следующими аргументами data.get(key)
             var_to_update_func.get(key)(val=data.get(key))
+
+    def update_arch_img_data(self,data):
+        pass
 
 
 def create_ui(process_reference):

@@ -141,6 +141,12 @@ class UIProcess(BaseProcess):
             self.ui_window.set_status_transfocator(data)
         elif name == 'Update profibus status':
             self.ui_window.set_status_profibus(data)
+        elif name == 'Metadata from parquet':
+            self.ui_window.parquet_viewer.set_metadata(data)
+        elif name == 'Plc data from parquet':
+            self.ui_window.parquet_viewer.set_plc_data(data)
+        elif name == 'Image from parquet file':
+            self.ui_window.parquet_viewer.associate_img_and_plc_data(data)
         elif name == 'next task':
             pass
         elif name == 'next task':

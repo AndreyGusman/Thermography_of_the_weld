@@ -122,10 +122,9 @@ class ParquetProcess(BaseProcess):
                                  queue=self.queue_to_camera)
 
             if self.b_req_file_close:
-                img_data = self.parquet_worker.get_img_and_data_from_parquet()
-                self.b_req_file_close = not img_data.get('That is all')
-                print(img_data.get('Image id'))
-                    # self.create_task(name='Image from parquet file', data=img, queue=self.queue_to_ui)
+                img_data = self.parquet_worker.get_img_from_parquet()
+                self.b_req_file_close = not img_data.pop('That is all')
+                self.create_task(name='Image from parquet file', data=img_data, queue=self.queue_to_ui)
 
     # задача потока работы с задачами
     def work_with_task(self):
@@ -182,6 +181,8 @@ class ParquetProcess(BaseProcess):
 
     def ret_parquet_file_metadata(self, metadata: dict):
         self.create_task(name='Metadata from parquet', data=metadata, queue=self.queue_to_ui)
+        plc_data = self.parquet_worker.get_plc_data_from_parquet()
+        self.create_task(name='Plc data from parquet', data=plc_data, queue=self.queue_to_ui)
         self.b_req_file_close = True
 
 

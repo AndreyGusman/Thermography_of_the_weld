@@ -53,9 +53,9 @@ class ParquetWorker:
         for key in data:
             if key != 'Image':
                 self.data_buf_dict[key].append(data[key])
+
             else:
                 # раскладываем картинку построчно
-
                 for line in range(self.config.WIDTH_IMAGE):
                     self.data_buf_dict[key].append(data[key][line])
 
@@ -86,17 +86,31 @@ class ParquetWorker:
             # return f'parquet writer need {time.time() - start_time}s for {self.config.BUFFER_SIZE} img'
         return None
 
+    def get_plc_data_from_parquet(self):
+        ret_dict = {f'Image {i + 1}': {} for i in range(self.req_file_number_frames)}
+        for key in ret_dict.keys():
+            val_dict = {var_name: None for var_name in list(self.req_file_df)}
+            key_spl = key
+            frame_number = int(key_spl.split(' ')[1]) - 1
+            for var_name in val_dict.keys():
+                if var_name not in ['Image', 'Defect mask', 'type']:
+                    val_dict[var_name] = self.req_file_df[var_name].iloc[frame_number * 512]
+            ret_dict[key] = val_dict
+        return ret_dict
+
     def get_parquet_file_metadata(self, parquet_file_name):
         self.request_file = parquet_file_name
-        print(f"запрос получен открываю файл {parquet_file_name}")
         self.req_file_df = pd.read_parquet(parquet_file_name)
         self.req_file_number_frames = int(len(self.req_file_df.index) / self.config.OUT_FRAME_HEIGHT)
-        time_first_frame = self.req_file_df.iloc[0, 0]
-        time_last_frame = self.req_file_df.iloc[self.config.OUT_FRAME_HEIGHT * (self.req_file_number_frames - 1), 0]
-        length_first_frame = self.req_file_df.iloc[0, 1]
-        length_last_frame = self.req_file_df.iloc[self.config.OUT_FRAME_HEIGHT * (self.req_file_number_frames - 1), 1]
-        pos_uzk_first_frame = self.req_file_df.iloc[0, 2]
-        pos_uzk_last_frame = self.req_file_df.iloc[self.config.OUT_FRAME_HEIGHT * (self.req_file_number_frames - 1), 2]
+        time_first_frame = self.req_file_df['Time'].iloc[0]
+        time_last_frame = self.req_file_df['Time'].iloc[
+            self.config.OUT_FRAME_HEIGHT * (self.req_file_number_frames - 1)]
+        length_first_frame = self.req_file_df['Length'].iloc[0]
+        length_last_frame = self.req_file_df['Length'].iloc[
+            self.config.OUT_FRAME_HEIGHT * (self.req_file_number_frames - 1)]
+        pos_uzk_first_frame = self.req_file_df['Pos_UZK'].iloc[0]
+        pos_uzk_last_frame = self.req_file_df['Pos_UZK'].iloc[
+            self.config.OUT_FRAME_HEIGHT * (self.req_file_number_frames - 1)]
         ret_dict = {'number_frames': self.req_file_number_frames, 'time_first_frame': time_first_frame,
                     'time_last_frame': time_last_frame, 'length_first_frame': length_first_frame,
                     'length_last_frame': length_last_frame, 'pos_UZK_first_frame': pos_uzk_first_frame,
@@ -104,10 +118,12 @@ class ParquetWorker:
         self.current_frame = 0
         self.process_reference.ret_parquet_file_metadata(ret_dict)
 
-    def get_img_and_data_from_parquet(self):
+    def get_img_from_parquet(self):
         ret_dict = {'Image id': None, 'Image': None, 'That is all': False}
-        image = self.req_file_df['Image'].iloc[self.current_frame * 512:self.current_frame * 512 + 512].values
+        image = np.vstack(self.req_file_df['Image'].iloc[
+                self.current_frame * self.config.OUT_FRAME_HEIGHT:self.current_frame * self.config.OUT_FRAME_HEIGHT + self.config.OUT_FRAME_HEIGHT].values)
         self.current_frame += 1
+
         ret_dict['Image id'] = self.current_frame
         ret_dict['Image'] = image
         if self.current_frame < self.req_file_number_frames:
@@ -116,29 +132,6 @@ class ParquetWorker:
         else:
             ret_dict['That is all'] = True
             return ret_dict
-
-    def read_from_parquet_to_img(self, parquet_file_name: str = ''):
-
-        time_data = []
-        zones_data = []
-        time_dt = []
-
-        for i in range(0, int(((pd.read_parquet(parquet_file_name, columns=['Zones']).count()) / (
-                self.config.WIDTH_IMAGE)))):
-            df = pd.read_parquet((parquet_file_name), columns=['Zones', 'Time'])
-            time_data.append(df.iloc[i * self.config.WIDTH_IMAGE, 1])
-            data_buf = []
-            if i == 0:
-                j = 0
-                while j <= self.config.WIDTH_IMAGE:
-                    data_buf.append(df.iloc[j, 0])
-                    j += 1
-            else:
-                j = 1
-                while j <= (self.config.WIDTH_IMAGE + 1):
-                    data_buf.append(df.iloc[j + (i * self.config.WIDTH_IMAGE), 0])
-                    j += 1
-            np.array(zones_data.append((np.array(data_buf))))
 
     def config_data_buf(self):
         if self.config.PARQUET_MODE == 1:
