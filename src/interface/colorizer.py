@@ -22,13 +22,13 @@ class Colorizer:
             rgb_img = (self.current_colormap(img) * 2 ** 8).astype(np.uint8)[:, :, :3]
         return rgb_img
 
-
     def create_colormap(self):
         if self.max_temperature >= self.min_temperature:
             self.nodes = [0.0, self.min_temperature, self.max_temperature, 1.0]
             self.current_colormap = mlp.colors.LinearSegmentedColormap.from_list("default_colormap",
                                                                                  list(zip(self.nodes,
                                                                                           self.colors)))
+
 
 def plot_examples(colormaps):
     """

@@ -92,8 +92,8 @@ class UIProcess(BaseProcess):
         self.thread_work_with_pipe.start()
 
         # блокирующий оператор, функция равершается при закрытии окна ui
-        res = sys.exit(self.app.exec())
-        print(f'Выход из интерфейса, с кодом {res}')
+        sys.exit(self.app.exec())
+
 
     # задача потока работы с каналами связи
     def work_with_pipe(self):
@@ -143,11 +143,11 @@ class UIProcess(BaseProcess):
         elif name == 'Update profibus status':
             self.ui_window.set_status_profibus(data)
         elif name == 'Metadata from parquet':
-            self.ui_window.parquet_viewer.set_metadata(data)
+            self.ui_window.arch_win.set_metadata(data)
         elif name == 'Plc data from parquet':
-            self.ui_window.parquet_viewer.set_plc_data(data)
+            self.ui_window.arch_win.set_plc_data(data)
         elif name == 'Image from parquet file':
-            self.ui_window.parquet_viewer.associate_img_and_plc_data(data)
+            self.ui_window.arch_win.associate_img_and_plc_data(data)
         elif name == 'next task':
             pass
         elif name == 'next task':
