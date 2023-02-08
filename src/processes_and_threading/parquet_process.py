@@ -11,7 +11,8 @@ class ParquetProcess(BaseProcess):
         super().__init__(pipe_to_main)
 
         # инициализация рабочего объекта
-        self.parquet_worker = ParquetWorker(self)
+        self.parquet_writer = ParquetWriter(self)
+        self.parquet_reader = ParquetReader(self)
         self.transfocator = SettingCamera()
         self.profibus = Profibus()
 
@@ -122,7 +123,7 @@ class ParquetProcess(BaseProcess):
                                  queue=self.queue_to_camera)
 
             if self.b_req_file_close:
-                img_data = self.parquet_worker.get_img_from_parquet()
+                img_data = self.parquet_reader.get_img_from_parquet()
                 self.b_req_file_close = not img_data.pop('That is all')
                 self.create_task(name='Image from parquet file', data=img_data, queue=self.queue_to_ui)
 
@@ -149,7 +150,7 @@ class ParquetProcess(BaseProcess):
     def from_ui_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
         if name == 'Request parquet file':
-            self.parquet_worker.get_parquet_file_metadata(data)
+            self.parquet_reader.get_parquet_file_metadata(data)
         elif name == 'next task':
             pass
         else:
@@ -158,7 +159,7 @@ class ParquetProcess(BaseProcess):
     def from_camera_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
         if name == 'Write to parquet':
-            answer = self.parquet_worker.write_to_parquet_from_dict(data)
+            answer = self.parquet_writer.add_dict_to_buf(data)
             if answer is not None:
                 self.create_logging_task(data=answer)
         elif name == 'next task':
@@ -170,7 +171,7 @@ class ParquetProcess(BaseProcess):
     def default_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
         if name == 'Update config':
-            self.parquet_worker.config = data
+            self.parquet_writer.config = data
         elif name == 'Start module':
             pass
         elif name == 'Stop module':
@@ -181,7 +182,7 @@ class ParquetProcess(BaseProcess):
 
     def ret_parquet_file_metadata(self, metadata: dict):
         self.create_task(name='Metadata from parquet', data=metadata, queue=self.queue_to_ui)
-        plc_data = self.parquet_worker.get_plc_data_from_parquet()
+        plc_data = self.parquet_reader.get_plc_data_from_parquet()
         self.create_task(name='Plc data from parquet', data=plc_data, queue=self.queue_to_ui)
         self.b_req_file_close = True
 
