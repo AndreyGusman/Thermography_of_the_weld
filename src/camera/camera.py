@@ -1,7 +1,6 @@
 import time
 import cv2
 import numpy as np
-import datetime
 
 from src.config import Config
 from src.data_format import DataFormat
@@ -104,18 +103,6 @@ class Camera:
             ret_dict['reserve zone 1'] = 0
             ret_dict['reserve zone 2'] = 0
             return ret_dict
-
-        # img_to_parquet = dict.copy(dict_img)
-        # for i in range(len(img_to_parquet)):
-        #     img_to_parquet[i] = self.camera.convert_img_to_one_row(img_to_parquet[i])
-        # if len(img_to_parquet) == 1:
-        #     img_to_parquet.append(np.zeros((1, 1)))
-        # # пока нет железа имитируем данные с ПЛК
-        # data_frame = [time.time(), random.randint(10, 10000), random.random(),
-        #               self.camera.config.OUT_FRAME_WIDTH * self.camera.config.OUT_FRAME_HEIGHT]
-        # for el in img_to_parquet:
-        #     data_frame.append(list(el))
-        # return data_frame
 
     def update_current_plc_data(self, data):
         self.current_plc_data = data

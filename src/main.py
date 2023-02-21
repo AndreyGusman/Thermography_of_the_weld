@@ -174,7 +174,7 @@ class MainProgram(BaseProcess):
 
     # обработчики задач
     def from_ui_task_handler(self, task):
-        name, data, decode_task = BaseProcess.decode_task(task)
+        name, data, decode_task = self.decode_task(task)
         if name == 'next task':
             pass
         elif name == 'next task':
@@ -183,7 +183,7 @@ class MainProgram(BaseProcess):
             pass
 
     def from_parquet_task_handler(self, task):
-        name, data, decode_task = BaseProcess.decode_task(task)
+        name, data, decode_task = self.decode_task(task)
         if name == 'next task':
             pass
         elif name == 'next task':
@@ -192,7 +192,7 @@ class MainProgram(BaseProcess):
             pass
 
     def from_camera_task_handler(self, task):
-        name, data, decode_task = BaseProcess.decode_task(task)
+        name, data, decode_task = self.decode_task(task)
         if name == 'next task':
             pass
         elif name == 'next task':
@@ -201,7 +201,7 @@ class MainProgram(BaseProcess):
             pass
 
     def default_task_handler(self, task):
-        name, data, decode_task = BaseProcess.decode_task(task)
+        name, data, decode_task = self.decode_task(task)
         if name == 'Update config':
             self.config = data
         elif name == 'Start module':
@@ -215,8 +215,8 @@ class MainProgram(BaseProcess):
 
 
 def main():
-    main = MainProgram()
-    main.action()
+    main_prog = MainProgram()
+    main_prog.action()
     print('main close')
 
 
