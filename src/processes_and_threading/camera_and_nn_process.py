@@ -92,7 +92,7 @@ class CameraAndNNProcess(BaseProcess):
         self.camera.get_capture()
         self.create_logging_task(data='Camera capture create')
         # пока есть разрешение считываем кадр с камеры и создаём задачи
-        while self.b_create_task:
+        while self.b_create_task and self.camera.is_open:
             dict_img = self.get_img_from_camera()
             self.create_task(name='Show img', data=dict_img, queue=self.queue_to_ui)
             self.create_task(name='Write to parquet', data=self.camera.create_data_frame_to_parquet(),
@@ -100,7 +100,10 @@ class CameraAndNNProcess(BaseProcess):
 
         self.create_logging_task(data='Camera stopped')
         # освобождаем камеру
-        self.camera.capture.release()
+        try:
+            self.camera.capture.release()
+        except:
+            pass
         self.create_logging_task(data='Camera capture closed')
 
     # задача потока работы с задачами

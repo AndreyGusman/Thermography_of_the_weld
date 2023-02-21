@@ -5,6 +5,10 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, 
                              QFileSystemModel, QTreeView, QCheckBox, QLineEdit
                              )
 from ..config import Config
+import datetime
+from pathlib import Path
+import glob
+from natsort import natsorted
 
 
 class ArchWin:
@@ -15,8 +19,13 @@ class ArchWin:
         # атрибуты экземпляра для решения задачи
         self.metadata = None
         self.image_and_plc_data = {}
+        self.last_selected_file = None
 
-        # подключения виджетов с класса HMI
+        self.sorted_file_path_list = None
+        self.dict_parquet_file = None
+        self.update_sorted_file_path_list()
+
+        # подключение виджетов с класса HMI
         # Buttons
         # Применение даты и времени
         self.btn_Set_DT = self.hmi_reference.findChild(QPushButton, "btn_Set_DT")
@@ -37,6 +46,8 @@ class ArchWin:
 
         # SpinBox
         self.B_Hour = self.hmi_reference.findChild(QSpinBox, "B_Hour")
+        self.set_val_hour(int(datetime.datetime.now().hour))
+
         self.B_Minute = self.hmi_reference.findChild(QSpinBox, "B_Minute")
         self.B_Second = self.hmi_reference.findChild(QSpinBox, "B_Second")
 
@@ -45,12 +56,15 @@ class ArchWin:
 
         # Обход корневого каталога
         self.model = QFileSystemModel()
+
         self.model.setRootPath(Config.WORKING_DIRECTORY)
         self.T_Parquet.setModel(self.model)
-        self.T_Parquet.setRootIndex(self.model.index('/'))
+        self.T_Parquet.setRootIndex(self.model.index(Config.WORKING_DIRECTORY))
         self.T_Parquet.setAnimated(False)
         self.T_Parquet.setIndentation(20)
         self.T_Parquet.setSortingEnabled(True)
+        for i in range(1, self.T_Parquet.header().length()):
+            self.T_Parquet.hideColumn(i)
 
         self.ScrollBar_Parquet.valueChanged.connect(self.show_img)
         self.btn_Set_DT.clicked.connect(self.set_dt)
@@ -85,16 +99,28 @@ class ArchWin:
     def set_dt(self):
         date_selected = self.calendar.selectedDate()
         h_val = self.B_Hour.value()
-        m_val = self.B_Minute.value()
-        s_val = self.B_Second.value()
-        dt = (str(date_selected.toPyDate()) + str(-h_val) + str(-m_val) + str(-s_val))
+        dt = (str(date_selected.toPyDate()) + str(-h_val))
         dt_list = (dt.split("-"))
-        year = dt_list[0]
-        month = dt_list[1]
-        day = dt_list[2]
-        h = dt_list[3]
-        m = dt_list[4]
-        print(year, month, day, h, m)
+        for i in range(len(dt_list)):
+            if dt_list[i][0] == '0':
+                dt_list[i] = dt_list[i][1:]
+        str_file_path = Config.WORKING_DIRECTORY
+        for el in dt_list:
+            str_file_path += "/"
+            str_file_path += el
+        if self.last_selected_file != str_file_path:
+
+            if Path(str_file_path).exists():
+                self.last_selected_file = str_file_path
+                self.T_Parquet.setRootIndex(self.model.index(self.last_selected_file))
+            else:
+                self.hmi_reference.show_message(title='Внимание!',
+                                                message='В указанное время запись БД не производилась')
+        else:
+            self.T_Parquet.setRootIndex(self.model.index(Config.WORKING_DIRECTORY))
+            self.last_selected_file = None
+
+        # print(str_file_path)
 
     def update_arch_img_data(self, data):
         pass
@@ -111,4 +137,18 @@ class ArchWin:
 
         self.update_arch_img_data(data)
 
+    def set_val_hour(self, val):
+        self.B_Hour.setValue(val)
 
+    def update_sorted_file_path_list(self):
+        file_pattern = Config.WORKING_DIRECTORY + '/*' + '/*' + '/*' + '/*' + '/*.parquet'
+        file_path_list = glob.glob(file_pattern)
+        for i in range(len(file_path_list)):
+            file_path_list[i] = file_path_list[i].replace('\\', '/')
+        file_path_list = natsorted(file_path_list)
+        self.sorted_file_path_list = file_path_list
+        self.update_dict_parquet_file()
+
+    def update_dict_parquet_file(self):
+        self.dict_parquet_file = {self.sorted_file_path_list[i]: i for i in range(len(self.sorted_file_path_list))}
+        print(self.dict_parquet_file)

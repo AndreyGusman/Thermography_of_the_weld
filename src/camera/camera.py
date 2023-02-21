@@ -9,6 +9,7 @@ from src.data_format import DataFormat
 class Camera:
     def __init__(self):
         self.capture = None
+        self.is_open = False
         self.config = Config()
 
         self.current_plc_data = {}
@@ -20,6 +21,7 @@ class Camera:
     def get_capture(self):
         try:
             self.capture = cv2.VideoCapture(self.config.CAMERA_NAME)
+            self.is_open = self.capture.isOpened()
         except Exception:
             print("неудалось подключиться к камере")
         return self.capture
@@ -49,7 +51,7 @@ class Camera:
         self.gray_img = self.gray_img * ((2 ** 8) / (2 ** self.config.CAMERA_ADC))
 
     def get_img(self):
-        if self.capture is not None:
+        if self.capture.isOpened():
 
             if self.config.USE_NOTEBOOK_CAMERA:
                 _, bgr_img = self.capture.read()
@@ -78,7 +80,8 @@ class Camera:
 
             return self.gray_img
         else:
-            print('Подключение к камере не установлено.')
+            pass
+            # print('Подключение к камере не установлено.')
 
     def get_current_img_and_plc_data(self):
         var_name_current_img = DataFormat.var_name_current_img.copy()

@@ -4,7 +4,7 @@ from PyQt5 import uic, QtGui
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, QDateTimeEdit,
                              QLCDNumber, QPushButton, QCalendarWidget, QSpinBox, QDoubleSpinBox, QGroupBox, QScrollBar,
-                             QFileSystemModel, QTreeView, QCheckBox, QLineEdit
+                             QFileSystemModel, QTreeView, QCheckBox, QLineEdit, QMessageBox
                              )
 
 from src.interface.colorizer import Colorizer
@@ -115,6 +115,10 @@ class UI(QMainWindow):
             return self.get_pix_map_rgb_ch(img)
         else:
             print('image wrong shape')
+
+    def show_message(self, title, message, box_type="info"):
+        msg_box = QMessageBox
+        msg_box.about(self, title, message)
 
     @staticmethod
     def get_pix_map_mono_ch(img):
