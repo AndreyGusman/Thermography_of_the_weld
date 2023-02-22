@@ -38,11 +38,15 @@ class LoadedParquetFile:
         self.is_loaded = False
 
     def set_all_data(self, file_name, metadata: dict, image_and_plc_data: dict):
-        self.clear_data()
-        self.file_name = file_name
-        self.metadata = metadata.copy()
-        self.image_and_plc_data = image_and_plc_data.copy()
-        self.is_loaded = self.check_exist_last_image()
+        if isinstance(file_name, str) and isinstance(metadata, dict) and isinstance(image_and_plc_data, dict):
+            self.clear_data()
+            self.file_name = file_name
+            self.metadata = metadata.copy()
+            self.image_and_plc_data = image_and_plc_data.copy()
+            self.check_exist_last_image()
+        else:
+            print(
+                f"input data failed validation, file_name {type(file_name)}, metadata {type(metadata)}, image_and_plc_data {type(image_and_plc_data)}")
 
     def get_all_data(self):
         return self.file_name, self.metadata, self.image_and_plc_data
@@ -55,4 +59,12 @@ class LoadedParquetFile:
                     self.screen_reference.update_arch_img(read_img_and_data)
 
     def check_exist_last_image(self):
-        return True
+        key = f'Image {self.metadata.get("number_frames")}'
+        if self.image_and_plc_data.get(key) is not None:
+            read_img_and_data = self.image_and_plc_data.get(f'Image {self.metadata.get("number_frames")}').copy()
+            if read_img_and_data['Image'] is not None:
+                self.is_loaded = True
+            else:
+                self.is_loaded = False
+        else:
+            self.is_loaded = False
