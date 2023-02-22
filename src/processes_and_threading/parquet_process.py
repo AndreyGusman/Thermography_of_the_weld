@@ -159,9 +159,7 @@ class ParquetProcess(BaseProcess):
     def from_camera_task_handler(self, task):
         name, data, decode_task = self.decode_task(task)
         if name == 'Write to parquet':
-            answer = self.parquet_writer.add_dict_to_buf(data)
-            if answer is not None:
-                self.create_logging_task(data=answer)
+            self.parquet_writer.add_dict_to_buf(data)
         elif name == 'next task':
             pass
         else:

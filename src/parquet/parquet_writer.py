@@ -70,7 +70,6 @@ class ParquetWriter:
         self.create_file_name(self.data_buf_dict.get('Time')[0],
                               self.data_buf_dict.get('Time')[-self.config.OUT_FRAME_HEIGHT])
 
-        print('start write parquet')
         start_time = time.time()
 
         self.len_data_buf_dict = 0
@@ -81,8 +80,10 @@ class ParquetWriter:
         df.to_parquet(rf"{self.file_path}/{self.file_name}")
 
         self.config_data_buf()
-        # return None
-        return f' need {time.time() - start_time}s for {self.config.BUFFER_SIZE} img'
+        self.process_reference.create_logging_task(
+            data=f' need {time.time() - start_time}s for {self.config.BUFFER_SIZE} img')
+        self.process_reference.create_task(name='Register parquet file', data=f"{self.file_path}/{self.file_name}",
+                                           queue=self.process_reference.queue_to_ui)
 
     def config_data_buf(self):
         if self.config.PARQUET_MODE == 1:

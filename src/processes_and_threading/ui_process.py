@@ -148,6 +148,8 @@ class UIProcess(BaseProcess):
             self.ui_window.arch_win.set_plc_data(data)
         elif name == 'Image from parquet file':
             self.ui_window.arch_win.associate_img_and_plc_data(data)
+        elif name == 'Register parquet file':
+            self.ui_window.arch_win.parquet_analyser.register_parquet_file(data)
         elif name == 'next task':
             pass
         elif name == 'next task':
