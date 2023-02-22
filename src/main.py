@@ -154,12 +154,13 @@ class MainProgram(BaseProcess):
                                                            b_pipe_to_parquet_free)
 
     def work_with_object(self):
-
         while self.b_create_task:
             self.b_work_camera_process = self.camera_and_nn_process.is_alive()
             self.b_work_ui_process = self.ui_process.is_alive()
             self.b_work_parquet_process = self.parquet_process.is_alive()
             self.b_create_task = self.b_work_camera_process or self.b_work_ui_process or self.b_work_parquet_process
+            if not self.b_work:
+                print(self.b_work_camera_process, self.b_work_ui_process, self.b_work_parquet_process)
         print('Main object worker finish')
 
         # задача потока работы с задачами

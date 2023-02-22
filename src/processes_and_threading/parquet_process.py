@@ -75,15 +75,15 @@ class ParquetProcess(BaseProcess):
         self.thread_work_with_pipe.start()
         self.thread_work_with_task.start()
 
-        self.create_logging_task(data='Parquet working create')
+        # self.create_logging_task(data='Parquet working create')
 
         # ждём пока заверщится работа
         self.thread_work_with_object.join()
-        self.create_logging_task(data='Parquet work with obj finish')
+        # self.create_logging_task(data='Parquet work with obj finish')
         self.thread_work_with_pipe.join()
-        self.create_logging_task(data='Parquet work with pipe finish')
+        # self.create_logging_task(data='Parquet work with pipe finish')
         self.thread_work_with_task.join()
-        self.create_logging_task(data='Parquet work with task finish')
+        # self.create_logging_task(data='Parquet work with task finish')
 
     # задача потока работы с каналами связи
     def work_with_pipe(self):

@@ -9,7 +9,6 @@ class LoadedParquetFile:
 
     def set_metadata(self, metadata):
         self.metadata = metadata
-        # self.ScrollBar_Parquet.setMaximum(self.metadata['number_frames'])
 
     def set_plc_data(self, plc_data):
         self.image_and_plc_data = plc_data

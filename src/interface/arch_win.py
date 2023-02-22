@@ -56,6 +56,8 @@ class ArchWin:
         # Архивный кадр
         self.l_Arch_img = self.hmi_reference.findChild(QLabel, "l_Arch_img")
 
+        self.navigate_info = self.hmi_reference.findChild(QLabel, "label_7")  # 60 char
+
         # Обход корневого каталога
         self.model = QFileSystemModel()
 
@@ -173,7 +175,7 @@ class ArchWin:
                 self.show_img()
 
             self.next_view_pq_file.clear_data()
-            self.next_view_pq_file.file_name,_ = self.parquet_analyser.check_neighboring_file(
+            self.next_view_pq_file.file_name, _ = self.parquet_analyser.check_neighboring_file(
                 self.current_view_pq_file.file_name)
             if self.next_view_pq_file.file_name is not None:
                 self.process_reference.get_parquet_file(self.next_view_pq_file.file_name)
@@ -231,3 +233,13 @@ class ArchWin:
 
     def set_val_hour(self, val):
         self.B_Hour.setValue(val)
+
+    def check_file_is_load(self):
+        return True
+
+    def set_text_parquet_info(self, text):
+        resized_text = self.resize_str_len(text)
+        self.navigate_info.setText(text)
+
+    def resize_str_len(self, text, mode: str = 'normal'):
+        return text

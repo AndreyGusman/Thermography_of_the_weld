@@ -75,18 +75,19 @@ class UIProcess(BaseProcess):
         self.thread_work_with_object.start()
         self.thread_work_with_object.join()
 
-        self.create_logging_task('ui close, create task to stop program')
-
         self.create_task_close_program(self.queue_to_main, self.queue_to_parquet, self.queue_to_camera)
         self.b_work = False
+
+        self.create_logging_task('ui close, create task to stop program')
+
         self.thread_work_with_pipe.join()
         self.thread_work_with_task.join()
-        self.create_logging_task('Ui pipe worker finish')
+        # self.create_logging_task('Ui pipe worker finish')
 
     # задача потока работы с обьектом (создание и отслеживание действий на экране)
     def work_with_object(self):
         self.app, self.ui_window = create_ui(self)
-        self.create_logging_task(data='UI create')
+        # self.create_logging_task(data='UI create')
         self.thread_work_with_task.start()
 
         self.thread_work_with_pipe.start()
@@ -94,10 +95,9 @@ class UIProcess(BaseProcess):
         # блокирующий оператор, функция равершается при закрытии окна ui
         sys.exit(self.app.exec())
 
-
     # задача потока работы с каналами связи
     def work_with_pipe(self):
-        self.create_logging_task(data='UI pipe check')
+        # self.create_logging_task(data='UI pipe check')
 
         while self.b_work or not self.b_pipe_free:
             # возможно константы из конфига будут подтягиваться при инициализации и будут неизменными
