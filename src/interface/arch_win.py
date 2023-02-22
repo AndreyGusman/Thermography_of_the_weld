@@ -4,26 +4,25 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, 
                              QLCDNumber, QPushButton, QCalendarWidget, QSpinBox, QDoubleSpinBox, QGroupBox, QScrollBar,
                              QFileSystemModel, QTreeView, QCheckBox, QLineEdit
                              )
+from src.processes_and_threading.base_processes_and_threading.loaded_parquet_file import LoadedParquetFile
+from src.processes_and_threading.base_processes_and_threading.parquet_analyser import ParquetAnalyser
 from ..config import Config
 import datetime
 from pathlib import Path
-import glob
-from natsort import natsorted
 
 
 class ArchWin:
-    def __init__(self, hmi_reference):
+    def __init__(self, hmi_reference, process_reference):
         # ссылка на интерфейс для подключения виджетов
         self.hmi_reference = hmi_reference
+        self.process_reference = process_reference
 
         # атрибуты экземпляра для решения задачи
-        self.metadata = None
-        self.image_and_plc_data = {}
+        self.parquet_analyser = ParquetAnalyser()
+        self.current_view_pq_file = LoadedParquetFile(self, is_current_file=True)
+        self.next_view_pq_file = LoadedParquetFile(self)
+        self.previous_view_pq_file = LoadedParquetFile(self)
         self.last_selected_file = None
-
-        self.sorted_file_path_list = None
-        self.dict_parquet_file = None
-        self.update_sorted_file_path_list()
 
         # подключение виджетов с класса HMI
         # Buttons
@@ -71,30 +70,46 @@ class ArchWin:
         self.T_Parquet.doubleClicked.connect(self._on_double_clicked)
 
     def associate_img_and_plc_data(self, img_data):
-        self.image_and_plc_data[f'Image {img_data["Image id"]}']['Image'] = img_data['Image']
-        if img_data["Image id"] == 1:
-            read_img_and_data = self.image_and_plc_data.get(f'Image {1}').copy()
-            self.update_arch_img(read_img_and_data)
+        file_name = img_data.pop('File name')
+        if file_name == self.current_view_pq_file.file_name:
+            self.current_view_pq_file.associate_img_and_plc_data(img_data)
+        elif file_name == self.next_view_pq_file.file_name:
+            self.next_view_pq_file.associate_img_and_plc_data(img_data)
+        elif file_name == self.previous_view_pq_file.file_name:
+            self.next_view_pq_file.associate_img_and_plc_data(img_data)
 
-    def set_metadata(self, metadata):
-        self.metadata = metadata
-        self.ScrollBar_Parquet.setMaximum(self.metadata['number_frames'])
+    def set_metadata(self, metadata: dict):
+        file_name = metadata.pop('File name')
+        print(f'input metadata from {file_name}')
+        if file_name == self.current_view_pq_file.file_name:
+            self.current_view_pq_file.set_metadata(metadata)
+        elif file_name == self.next_view_pq_file.file_name:
+            self.next_view_pq_file.set_metadata(metadata)
+        elif file_name == self.previous_view_pq_file.file_name:
+            self.next_view_pq_file.set_metadata(metadata)
+        # self.ScrollBar_Parquet.setMaximum(self.metadata['number_frames'])
 
     def set_plc_data(self, plc_data):
-        self.image_and_plc_data = plc_data
+        file_name = plc_data.pop('File name')
+        if file_name == self.current_view_pq_file.file_name:
+            self.current_view_pq_file.set_plc_data(plc_data)
+        elif file_name == self.next_view_pq_file.file_name:
+            self.next_view_pq_file.set_plc_data(plc_data)
+        elif file_name == self.previous_view_pq_file.file_name:
+            self.next_view_pq_file.set_plc_data(plc_data)
 
     def show_img(self):
         select_img_id = self.ScrollBar_Parquet.value()
         key = f'Image {select_img_id}'
-        if key != 'Image':
-            if self.image_and_plc_data.get(key) is not None:
-                read_img_and_data = self.image_and_plc_data.get(f'Image {select_img_id}').copy()
-                if read_img_and_data['Image'] is not None:
-                    self.update_arch_img(read_img_and_data)
+        self.current_view_pq_file.get_img_and_plc_data(key, select_img_id)
 
     def _on_double_clicked(self):
         index = self.T_Parquet.currentIndex()
-        self.hmi_reference.process_reference.get_parquet_file(self.model.filePath(index))
+        self.process_reference.get_parquet_file(self.model.filePath(index))
+        self.current_view_pq_file.file_name = self.model.filePath(index)
+        self.next_view_pq_file.file_name, self.previous_view_pq_file.file_name = self.parquet_analyser.check_neighboring_file(
+            self.model.filePath(index))
+        print(f'create req {self.model.filePath(index)}')
 
     def set_dt(self):
         date_selected = self.calendar.selectedDate()
@@ -139,16 +154,3 @@ class ArchWin:
 
     def set_val_hour(self, val):
         self.B_Hour.setValue(val)
-
-    def update_sorted_file_path_list(self):
-        file_pattern = Config.WORKING_DIRECTORY + '/*' + '/*' + '/*' + '/*' + '/*.parquet'
-        file_path_list = glob.glob(file_pattern)
-        for i in range(len(file_path_list)):
-            file_path_list[i] = file_path_list[i].replace('\\', '/')
-        file_path_list = natsorted(file_path_list)
-        self.sorted_file_path_list = file_path_list
-        self.update_dict_parquet_file()
-
-    def update_dict_parquet_file(self):
-        self.dict_parquet_file = {self.sorted_file_path_list[i]: i for i in range(len(self.sorted_file_path_list))}
-        print(self.dict_parquet_file)

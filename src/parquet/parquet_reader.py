@@ -26,6 +26,7 @@ class ParquetReader:
                 if var_name not in ['Image', 'Defect mask', 'type']:
                     val_dict[var_name] = self.req_file_df[var_name].iloc[frame_number * 512]
             ret_dict[key] = val_dict
+        ret_dict['File name'] = self.request_file
         return ret_dict
 
     def get_parquet_file_metadata(self, parquet_file_name):
@@ -44,12 +45,13 @@ class ParquetReader:
         ret_dict = {'number_frames': self.req_file_number_frames, 'time_first_frame': time_first_frame,
                     'time_last_frame': time_last_frame, 'length_first_frame': length_first_frame,
                     'length_last_frame': length_last_frame, 'pos_UZK_first_frame': pos_uzk_first_frame,
-                    'pos_UZK_last_frame': pos_uzk_last_frame}
+                    'pos_UZK_last_frame': pos_uzk_last_frame, 'File name': self.request_file}
         self.current_frame = 0
         self.process_reference.ret_parquet_file_metadata(ret_dict)
 
     def get_img_from_parquet(self):
-        ret_dict = {'Image id': None, 'Image': None, 'That is all': False}
+        ret_dict = {'Image id': None, 'Image': None, 'That is all': False, 'File name': self.request_file
+                    }
         image = np.vstack(self.req_file_df['Image'].iloc[
                           self.current_frame * self.config.OUT_FRAME_HEIGHT:self.current_frame * self.config.OUT_FRAME_HEIGHT + self.config.OUT_FRAME_HEIGHT].values)
         self.current_frame += 1

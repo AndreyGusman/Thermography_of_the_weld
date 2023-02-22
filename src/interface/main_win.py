@@ -8,7 +8,7 @@ from ..config import Config
 
 
 class MainWin:
-    def __init__(self, hmi_reference):
+    def __init__(self, hmi_reference,process_reference):
         # ссылка на интерфейс для подключения виджетов
         self.hmi_reference = hmi_reference
 

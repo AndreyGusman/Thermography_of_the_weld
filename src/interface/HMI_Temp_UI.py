@@ -26,10 +26,10 @@ class UI(QMainWindow):
 
         # инициализация виджетов и методов экранов
         self.colorizer = Colorizer()
-        self.arch_win = ArchWin(self)
-        self.main_win = MainWin(self)
-        self.setting_win = SettingWin(self)
-        self.transfocator_win = TransfocatorWin(self)
+        self.arch_win = ArchWin(self, self.process_reference)
+        self.main_win = MainWin(self, self.process_reference)
+        self.setting_win = SettingWin(self, self.process_reference)
+        self.transfocator_win = TransfocatorWin(self, self.process_reference)
 
         # Определение виджетов
         # Buttons

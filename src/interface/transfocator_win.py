@@ -8,10 +8,10 @@ from ..config import Config
 
 
 class TransfocatorWin:
-    def __init__(self, hmi_reference):
+    def __init__(self, hmi_reference,process_reference):
         # ссылка на интерфейс для подключения виджетов
         self.hmi_reference = hmi_reference
-
+        self.process_reference = process_reference
         # LCDNumber
 
         self.lcd_Pos_UZK_2 = self.hmi_reference.findChild(QLCDNumber, "lcd_Pos_UZK_2")
