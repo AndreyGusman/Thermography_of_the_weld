@@ -59,10 +59,12 @@ class UIProcess(BaseProcess):
         self.b_pipe_free = False
         self.b_queue_free = False
         self.b_create_task = True
+        self.b_force_stop = False
 
     # метод выполняемый при старте процесса
     def run(self):
         self.action()
+
         self.create_logging_task('Ui working finish')
 
     # метод запуска потоков при закрытии главного экрана, формируется задача на останов остальных модулей
@@ -75,11 +77,6 @@ class UIProcess(BaseProcess):
         self.thread_work_with_object.start()
         self.thread_work_with_object.join()
 
-        self.create_task_close_program(self.queue_to_main, self.queue_to_parquet, self.queue_to_camera)
-        self.b_work = False
-
-        self.create_logging_task('ui close, create task to stop program')
-
         self.thread_work_with_pipe.join()
         self.thread_work_with_task.join()
         # self.create_logging_task('Ui pipe worker finish')
@@ -89,7 +86,6 @@ class UIProcess(BaseProcess):
         self.app, self.ui_window = create_ui(self)
         # self.create_logging_task(data='UI create')
         self.thread_work_with_task.start()
-
         self.thread_work_with_pipe.start()
 
         # блокирующий оператор, функция равершается при закрытии окна ui
@@ -99,7 +95,7 @@ class UIProcess(BaseProcess):
     def work_with_pipe(self):
         # self.create_logging_task(data='UI pipe check')
 
-        while self.b_work or not self.b_pipe_free:
+        while self.b_work or not self.b_pipe_free and not self.b_force_stop:
             # возможно константы из конфига будут подтягиваться при инициализации и будут неизменными
             b_pipe_to_main_free = self.to_main_pipe_worker.work()
             b_pipe_to_camera_free = self.to_camera_pipe_worker.work()
@@ -109,8 +105,7 @@ class UIProcess(BaseProcess):
 
     # задача потока работы с задачами
     def work_with_task(self):
-
-        while self.b_work or not self.b_pipe_free or not self.b_queue_free:
+        while self.b_work or not self.b_pipe_free or not self.b_queue_free and not self.b_force_stop:
             b_queue_from_main_free = self.from_main_task_executor.work()
             b_queue_from_camera_free = self.from_camera_task_executor.work()
             b_queue_from_parquet_free = self.from_parquet_task_executor.work()
@@ -119,6 +114,8 @@ class UIProcess(BaseProcess):
 
     # обработчики задач
     def from_camera_task_handler(self, task):
+        if not self.b_work:
+            return
         name, data, decode_task = self.decode_task(task)
         if name == 'Show img':
             self.ui_window.show_img_and_plc_data(data)
@@ -128,7 +125,11 @@ class UIProcess(BaseProcess):
             self.create_logging_task(data=f'Ui process task from camera the solution is not defined, task name {name}')
 
     def from_main_task_handler(self, task):
+        if not self.b_work:
+            return
         name, data, decode_task = self.decode_task(task)
+        if not self.b_work:
+            return
         if name == 'next task':
             pass
         elif name == 'next task':
@@ -137,6 +138,8 @@ class UIProcess(BaseProcess):
             self.create_logging_task(data=f'Ui process task from main the solution is not defined, task name {name}')
 
     def from_parquet_task_handler(self, task):
+        if not self.b_work:
+            return
         name, data, decode_task = self.decode_task(task)
         if name == 'Update transfocator status':
             self.ui_window.set_status_transfocator(data)
@@ -158,6 +161,8 @@ class UIProcess(BaseProcess):
             self.create_logging_task(data=f'Ui process task from parquet the solution is not defined, task name {name}')
 
     def default_task_handler(self, task):
+        if not self.b_work:
+            return
         name, data, decode_task = self.decode_task(task)
         if name == 'Update config':
             self.config = data

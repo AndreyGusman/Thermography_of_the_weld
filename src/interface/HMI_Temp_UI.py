@@ -1,4 +1,6 @@
 import sys
+import time
+
 import numpy as np
 from PyQt5 import uic, QtGui
 from PyQt5.QtCore import QDir
@@ -6,7 +8,7 @@ from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, 
                              QLCDNumber, QPushButton, QCalendarWidget, QSpinBox, QDoubleSpinBox, QGroupBox, QScrollBar,
                              QFileSystemModel, QTreeView, QCheckBox, QLineEdit, QMessageBox
                              )
-
+from PyQt5.QtWidgets import QApplication, QMessageBox, QMainWindow, QAction
 from src.interface.colorizer import Colorizer
 from src.interface.arch_win import ArchWin
 from src.interface.main_win import MainWin
@@ -69,8 +71,50 @@ class UI(QMainWindow):
         self.btn_Transf.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(1))
         self.btn_Arch.clicked.connect(lambda: self.StackedWidget.setCurrentIndex(3))
 
+        quit = QAction("Quit", self)
+        quit.triggered.connect(self.closeEvent)
+
         # Show the App
         self.show()
+
+    def closeEvent(self, event):
+        """Generate 'question' dialog on clicking 'X' button in title bar.
+
+        Reimplement the closeEvent() event handler to include a 'Question'
+        dialog with options on how to proceed - Save, Close, Cancel buttons
+        """
+        reply = QMessageBox.question(
+            self, "Закрыть приложение",
+            "Вы уверены?",
+            QMessageBox.Close | QMessageBox.Cancel
+        )
+
+        if reply == QMessageBox.Close:
+            self.process_reference.create_task_close_program(self.process_reference.queue_to_main,
+                                                             self.process_reference.queue_to_parquet,
+                                                             self.process_reference.queue_to_camera)
+            self.process_reference.create_logging_task('ui close, create task to stop program')
+            one_second_timer = time.time()
+            while time.time() - one_second_timer < 2:
+                pass
+            self.process_reference.b_force_stop = True
+            self.process_reference.b_work = False
+
+            one_second_timer = time.time()
+            while time.time() - one_second_timer < 2:
+                pass
+            event.accept()
+        else:
+            event.ignore()
+
+            #
+            #
+            #
+            #
+            # while self.process_reference.b_work or not self.process_reference.b_pipe_free or\
+            #         not self.process_reference.b_queue_free:
+            #     print(self.process_reference.b_work , not self.process_reference.b_pipe_free ,\
+            #         not self.process_reference.b_queue_free)
 
     def set_status_profibus(self, net_status):
         if net_status:

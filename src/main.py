@@ -1,3 +1,5 @@
+import time
+
 from src.processes_and_threading import CameraAndNNProcess, ParquetProcess, UIProcess
 from src.processes_and_threading.base_processes_and_threading.base_process import BaseProcess
 import multiprocessing
@@ -154,13 +156,15 @@ class MainProgram(BaseProcess):
                                                            b_pipe_to_parquet_free)
 
     def work_with_object(self):
+        # one_second_timer = time.time()
         while self.b_create_task:
             self.b_work_camera_process = self.camera_and_nn_process.is_alive()
             self.b_work_ui_process = self.ui_process.is_alive()
             self.b_work_parquet_process = self.parquet_process.is_alive()
             self.b_create_task = self.b_work_camera_process or self.b_work_ui_process or self.b_work_parquet_process
-            if not self.b_work:
-                print(self.b_work_camera_process, self.b_work_ui_process, self.b_work_parquet_process)
+            # if not self.b_work and time.time() - one_second_timer > 1:
+            #     one_second_timer = time.time()
+            #     print('process status',self.b_work_camera_process, self.b_work_ui_process, self.b_work_parquet_process)
         print('Main object worker finish')
 
         # задача потока работы с задачами
