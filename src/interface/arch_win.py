@@ -2,7 +2,7 @@ from PyQt5 import uic, QtGui
 from PyQt5.QtCore import QDir
 from PyQt5.QtWidgets import (QMainWindow, QApplication, QStackedWidget, QLabel, QDateTimeEdit,
                              QLCDNumber, QPushButton, QCalendarWidget, QSpinBox, QDoubleSpinBox, QGroupBox, QScrollBar,
-                             QFileSystemModel, QTreeView, QCheckBox, QLineEdit
+                             QFileSystemModel, QTreeView, QCheckBox, QLineEdit, QAbstractSlider
                              )
 from src.processes_and_threading.base_processes_and_threading.loaded_parquet_file import LoadedParquetFile
 from src.processes_and_threading.base_processes_and_threading.parquet_analyser import ParquetAnalyser
@@ -22,7 +22,10 @@ class ArchWin:
         self.current_view_pq_file = LoadedParquetFile(self, is_current_file=True)
         self.next_view_pq_file = LoadedParquetFile(self)
         self.previous_view_pq_file = LoadedParquetFile(self)
+
         self.last_selected_file = None
+        self.last_scroll_value = None
+        self.slider_over_value = 0
 
         # подключение виджетов с класса HMI
         # Buttons
@@ -66,6 +69,8 @@ class ArchWin:
             self.T_Parquet.hideColumn(i)
 
         self.ScrollBar_Parquet.valueChanged.connect(self.show_img)
+        self.ScrollBar_Parquet.sliderReleased.connect(self.is_change_file)
+
         self.btn_Set_DT.clicked.connect(self.set_dt)
         self.T_Parquet.doubleClicked.connect(self._on_double_clicked)
 
@@ -73,14 +78,19 @@ class ArchWin:
         file_name = img_data.pop('File name')
         if file_name == self.current_view_pq_file.file_name:
             self.current_view_pq_file.associate_img_and_plc_data(img_data)
+            if self.current_view_pq_file.is_loaded and self.next_view_pq_file.file_name is not None:
+                self.process_reference.get_parquet_file(self.next_view_pq_file.file_name)
+
         elif file_name == self.next_view_pq_file.file_name:
             self.next_view_pq_file.associate_img_and_plc_data(img_data)
+            if self.next_view_pq_file.is_loaded and self.previous_view_pq_file.file_name is not None:
+                self.process_reference.get_parquet_file(self.previous_view_pq_file.file_name)
+
         elif file_name == self.previous_view_pq_file.file_name:
             self.next_view_pq_file.associate_img_and_plc_data(img_data)
 
     def set_metadata(self, metadata: dict):
         file_name = metadata.pop('File name')
-        print(f'input metadata from {file_name}')
         if file_name == self.current_view_pq_file.file_name:
             self.current_view_pq_file.set_metadata(metadata)
         elif file_name == self.next_view_pq_file.file_name:
@@ -103,13 +113,45 @@ class ArchWin:
         key = f'Image {select_img_id}'
         self.current_view_pq_file.get_img_and_plc_data(key, select_img_id)
 
+        if select_img_id != self.ScrollBar_Parquet.minimum() or select_img_id != self.ScrollBar_Parquet.maximum():
+            self.slider_over_value = 0
+
+    def is_change_file(self):
+        self.last_scroll_value = self.ScrollBar_Parquet.value()
+        if self.last_scroll_value == self.ScrollBar_Parquet.minimum() or self.last_scroll_value == self.ScrollBar_Parquet.maximum():
+            self.slider_over_value += 1
+        else:
+            self.slider_over_value = 0
+        if self.slider_over_value >= 2 and self.last_scroll_value == self.ScrollBar_Parquet.minimum():
+            self.replace_previous_file()
+        if self.slider_over_value >= 2 and self.last_scroll_value == self.ScrollBar_Parquet.maximum():
+            self.replace_next_file()
+
+    def replace_previous_file(self):
+
+        self.next_view_pq_file.clear_data()
+        data1, data2, data3 = self.current_view_pq_file.get_all_data()
+        self.next_view_pq_file.set_all_data(data1, data2, data3)
+
+        self.current_view_pq_file.clear_data()
+        data1, data2, data3 = self.previous_view_pq_file.get_all_data()
+        self.current_view_pq_file.set_all_data(data1, data2, data3)
+        #
+        # self.previous_view_pq_file.clear_data()
+        # _, self.previous_view_pq_file.file_name = self.parquet_analyser.check_neighboring_file(
+        #     self.current_view_pq_file.file_name)
+        # if self.previous_view_pq_file.file_name is not None:
+        #     self.process_reference.get_parquet_file(self.previous_view_pq_file.file_name)
+
+    def replace_next_file(self):
+        pass
+
     def _on_double_clicked(self):
         index = self.T_Parquet.currentIndex()
         self.process_reference.get_parquet_file(self.model.filePath(index))
         self.current_view_pq_file.file_name = self.model.filePath(index)
         self.next_view_pq_file.file_name, self.previous_view_pq_file.file_name = self.parquet_analyser.check_neighboring_file(
             self.model.filePath(index))
-        print(f'create req {self.model.filePath(index)}')
 
     def set_dt(self):
         date_selected = self.calendar.selectedDate()

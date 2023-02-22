@@ -19,6 +19,7 @@ class LoadedParquetFile:
 
         if img_data["Image id"] == self.metadata.get('number_frames'):
             self.is_loaded = True
+            print(f'file {self.file_name} loaded')
         else:
             self.is_loaded = False
 

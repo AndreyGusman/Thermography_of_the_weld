@@ -35,7 +35,7 @@ class Config:
     EPOCHS: int = 10
 
     # настройки работы с parquet
-    BUFFER_SIZE = 300
+    BUFFER_SIZE = 10
     WORKING_DIRECTORY: str = "C:/Users/Equint/PycharmProjects/thermography_of_the_weld/db"
     PARQUET_MODE = 1  # 1 - первый этап без нейросети, 2 - второй этап с нейросетью
     # , 3 - нейросеть + классификатор дефектов
