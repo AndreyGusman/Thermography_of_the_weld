@@ -8,7 +8,6 @@ if __name__ == '__main__':
     print("Version from 2023 01 18 v .01")
     print('start main')
 
-
     cgitb.enable(format='text')
     main = MainProgram()
     main.action()

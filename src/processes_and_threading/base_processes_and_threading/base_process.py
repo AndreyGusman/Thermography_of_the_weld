@@ -133,13 +133,13 @@ class BaseProcess(multiprocessing.Process):
             return False
 
     @staticmethod
-    def create_thread(work):
+    def create_thread(work, is_daemon=False):
         """
         Метод создаёт базовый поток
         Args: work - целевая функция потока
         :return: объект экземпляра класса BaseThread() с целевой функцией work
         """
-        return BaseThread(work)
+        return BaseThread(work, is_daemon=is_daemon)
 
 
 if __name__ == '__main__':

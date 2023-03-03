@@ -15,6 +15,9 @@ class LoadedParquetFile:
 
     def associate_img_and_plc_data(self, img_data):
         self.image_and_plc_data[f'Image {img_data["Image id"]}']['Image'] = img_data['Image']
+        self.screen_reference.set_text_parquet_info(text=f'Получен кадр №{img_data["Image id"]} из '
+                                                         f'{self.metadata.get("number_frames")} '
+                                                         f'parquet файла {self.file_name}')
 
         if img_data["Image id"] == self.metadata.get('number_frames'):
             self.is_loaded = True
@@ -45,7 +48,8 @@ class LoadedParquetFile:
             self.check_exist_last_image()
         else:
             print(
-                f"input data failed validation, file_name {type(file_name)}, metadata {type(metadata)}, image_and_plc_data {type(image_and_plc_data)}")
+                f"input data failed validation, file_name {type(file_name)}, "
+                f"metadata {type(metadata)}, image_and_plc_data {type(image_and_plc_data)}")
 
     def get_all_data(self):
         return self.file_name, self.metadata, self.image_and_plc_data
@@ -56,6 +60,9 @@ class LoadedParquetFile:
                 read_img_and_data = self.image_and_plc_data.get(f'Image {select_img_id}').copy()
                 if read_img_and_data['Image'] is not None:
                     self.screen_reference.update_arch_img(read_img_and_data)
+                    self.screen_reference.set_text_parquet_info(text=f'Отображается кадр №{select_img_id} из '
+                                                                     f'{self.metadata.get("number_frames")} файла '
+                                                                     f'{self.file_name}')
 
     def check_exist_last_image(self):
         key = f'Image {self.metadata.get("number_frames")}'

@@ -59,6 +59,7 @@ class ParquetProcess(BaseProcess):
         self.b_create_task = True
         self.b_req_file_close = False
         self.gen_img_data = None
+        self.b_force_stop = False
 
     def run(self):
         self.action()
@@ -88,7 +89,7 @@ class ParquetProcess(BaseProcess):
     # задача потока работы с каналами связи
     def work_with_pipe(self):
         # работа c Pipe пока есть разрешение на работу или каналы не свободны
-        while self.b_work or not self.b_pipe_free:
+        while (self.b_work or not self.b_pipe_free) and not self.b_force_stop:
             b_pipe_to_main_free = self.to_main_pipe_worker.work()
             b_pipe_to_ui_free = self.to_ui_pipe_worker.work()
             b_pipe_to_camera_free = self.to_camera_pipe_worker.work()
@@ -108,7 +109,7 @@ class ParquetProcess(BaseProcess):
         timer_change_net_status = time.time()
         timer_change_tech_info = time.time()
 
-        while self.b_create_task:
+        while self.b_create_task and not self.b_force_stop:
             if time.time() - timer_change_net_status > 2:
                 timer_change_net_status = time.time()
                 self.create_task(name='Update profibus status', data=self.profibus.get_profibus_status(),
@@ -129,7 +130,7 @@ class ParquetProcess(BaseProcess):
 
     # задача потока работы с задачами
     def work_with_task(self):
-        while self.b_work or not self.b_pipe_free or not self.b_queue_free:
+        while (self.b_work or not self.b_pipe_free or not self.b_queue_free) and not self.b_force_stop:
             b_queue_from_main_free = self.from_main_task_executor.work()
             b_queue_from_ui_free = self.from_ui_task_executor.work()
             b_queue_from_parquet_free = self.from_camera_task_executor.work()
@@ -175,6 +176,7 @@ class ParquetProcess(BaseProcess):
         elif name == 'Stop module':
             self.b_work = False
             self.b_create_task = False
+            self.b_force_stop  = True
         else:
             self.create_logging_task(data=f'Parquet process default task  solution is not defined, task name {name}')
 

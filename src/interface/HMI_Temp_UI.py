@@ -14,6 +14,7 @@ from src.interface.arch_win import ArchWin
 from src.interface.main_win import MainWin
 from src.interface.setting_win import SettingWin
 from src.interface.transfocator_win import TransfocatorWin
+from src.config import Config
 
 
 # TODO прописать чтение и отображение архивных записей
@@ -95,26 +96,13 @@ class UI(QMainWindow):
                                                              self.process_reference.queue_to_camera)
             self.process_reference.create_logging_task('ui close, create task to stop program')
             one_second_timer = time.time()
-            while time.time() - one_second_timer < 2:
+            while time.time() - one_second_timer < Config.SEND_RECEIVE_TIME_LIMIT*3:
                 pass
             self.process_reference.b_force_stop = True
             self.process_reference.b_work = False
-
-            one_second_timer = time.time()
-            while time.time() - one_second_timer < 2:
-                pass
             event.accept()
         else:
             event.ignore()
-
-            #
-            #
-            #
-            #
-            # while self.process_reference.b_work or not self.process_reference.b_pipe_free or\
-            #         not self.process_reference.b_queue_free:
-            #     print(self.process_reference.b_work , not self.process_reference.b_pipe_free ,\
-            #         not self.process_reference.b_queue_free)
 
     def set_status_profibus(self, net_status):
         if net_status:

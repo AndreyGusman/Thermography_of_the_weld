@@ -9,8 +9,8 @@ class BaseThread(threading.Thread):
 
     """
 
-    def __init__(self, work):
-        threading.Thread.__init__(self)
+    def __init__(self, work, is_daemon=False):
+        threading.Thread.__init__(self, daemon=is_daemon)
         self.work = work
 
     def run(self):

@@ -11,7 +11,6 @@ class MainProgram(BaseProcess):
     def __init__(self):
         super().__init__(None)
         # собственный экземпляр конфигурации
-
         self.config = Config()
 
         # объявление  процессов
@@ -137,14 +136,14 @@ class MainProgram(BaseProcess):
         self.thread_work_with_pipe.join()
         self.thread_work_with_task.join()
 
+        self.parquet_process.join()
+        print('Parquet close')
+
         self.camera_and_nn_process.join()
         print('Camera close')
 
         self.ui_process.join()
         print('Ui close')
-
-        self.parquet_process.join()
-        print('Parquet close')
 
     def work_with_pipe(self):
         # работа c Pipe пока есть разрешение на работу или каналы не свободны

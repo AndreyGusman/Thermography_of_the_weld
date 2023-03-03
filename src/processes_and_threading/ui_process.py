@@ -60,6 +60,8 @@ class UIProcess(BaseProcess):
         self.b_queue_free = False
         self.b_create_task = True
         self.b_force_stop = False
+        self.b_pipe_worker_close = False
+        self.b_task_executor_close = False
 
     # метод выполняемый при старте процесса
     def run(self):
@@ -75,10 +77,14 @@ class UIProcess(BaseProcess):
         self.thread_work_with_task = self.create_thread(self.work_with_task)
 
         self.thread_work_with_object.start()
+
         self.thread_work_with_object.join()
 
         self.thread_work_with_pipe.join()
         self.thread_work_with_task.join()
+
+        print('work with object close')
+
         # self.create_logging_task('Ui pipe worker finish')
 
     # задача потока работы с обьектом (создание и отслеживание действий на экране)
@@ -95,27 +101,30 @@ class UIProcess(BaseProcess):
     def work_with_pipe(self):
         # self.create_logging_task(data='UI pipe check')
 
-        while self.b_work or not self.b_pipe_free and not self.b_force_stop:
+        while (self.b_work or not self.b_pipe_free) and not self.b_force_stop:
             # возможно константы из конфига будут подтягиваться при инициализации и будут неизменными
             b_pipe_to_main_free = self.to_main_pipe_worker.work()
             b_pipe_to_camera_free = self.to_camera_pipe_worker.work()
             b_pipe_to_parquet_free = self.to_parquet_pipe_worker.work()
 
             self.b_pipe_free = self.check_pipe_free(b_pipe_to_main_free, b_pipe_to_camera_free, b_pipe_to_parquet_free)
+        print('work_with_pipe close')
+        self.b_pipe_worker_close = True
 
     # задача потока работы с задачами
     def work_with_task(self):
-        while self.b_work or not self.b_pipe_free or not self.b_queue_free and not self.b_force_stop:
+        while (self.b_work or not self.b_pipe_free or not self.b_queue_free) and not self.b_force_stop:
             b_queue_from_main_free = self.from_main_task_executor.work()
             b_queue_from_camera_free = self.from_camera_task_executor.work()
             b_queue_from_parquet_free = self.from_parquet_task_executor.work()
             self.b_queue_free = self.check_pipe_free(b_queue_from_main_free, b_queue_from_camera_free,
                                                      b_queue_from_parquet_free)
+        print('work_with_task close')
+        self.b_task_executor_close = True
 
     # обработчики задач
+
     def from_camera_task_handler(self, task):
-        if not self.b_work:
-            return
         name, data, decode_task = self.decode_task(task)
         if name == 'Show img':
             self.ui_window.show_img_and_plc_data(data)
@@ -125,8 +134,6 @@ class UIProcess(BaseProcess):
             self.create_logging_task(data=f'Ui process task from camera the solution is not defined, task name {name}')
 
     def from_main_task_handler(self, task):
-        if not self.b_work:
-            return
         name, data, decode_task = self.decode_task(task)
         if not self.b_work:
             return
@@ -138,8 +145,6 @@ class UIProcess(BaseProcess):
             self.create_logging_task(data=f'Ui process task from main the solution is not defined, task name {name}')
 
     def from_parquet_task_handler(self, task):
-        if not self.b_work:
-            return
         name, data, decode_task = self.decode_task(task)
         if name == 'Update transfocator status':
             self.ui_window.set_status_transfocator(data)
@@ -161,8 +166,6 @@ class UIProcess(BaseProcess):
             self.create_logging_task(data=f'Ui process task from parquet the solution is not defined, task name {name}')
 
     def default_task_handler(self, task):
-        if not self.b_work:
-            return
         name, data, decode_task = self.decode_task(task)
         if name == 'Update config':
             self.config = data
@@ -170,6 +173,7 @@ class UIProcess(BaseProcess):
             pass
         elif name == 'Stop module':
             self.b_work = False
+            self.b_force_stop = True
         else:
             self.create_logging_task(data=f'Ui process default task  solution is not defined, task name {name}')
 

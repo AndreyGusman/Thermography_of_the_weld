@@ -54,6 +54,7 @@ class CameraAndNNProcess(BaseProcess):
         self.b_pipe_free = False
         self.b_queue_free = False
         self.b_create_task = True
+        self.b_force_stop = False
 
     # метод выполняемый при старте процесса
     def run(self):
@@ -80,7 +81,7 @@ class CameraAndNNProcess(BaseProcess):
     # задача потока работы с каналами связи
     def work_with_pipe(self):
         # работа c Pipe пока есть разрешение на работу или каналы не свободны
-        while self.b_work or not self.b_pipe_free:
+        while (self.b_work or not self.b_pipe_free) and not self.b_force_stop:
             b_pipe_to_main_free = self.to_main_pipe_worker.work()
             b_pipe_to_ui_free = self.to_ui_pipe_worker.work()
             b_pipe_to_parquet_free = self.to_parquet_pipe_worker.work()
@@ -92,7 +93,7 @@ class CameraAndNNProcess(BaseProcess):
         self.camera.get_capture()
         # self.create_logging_task(data='Camera capture create')
         # пока есть разрешение считываем кадр с камеры и создаём задачи
-        while self.b_create_task and self.camera.is_open:
+        while (self.b_create_task and self.camera.is_open) and not self.b_force_stop:
             dict_img = self.get_img_from_camera()
             self.create_task(name='Show img', data=dict_img, queue=self.queue_to_ui)
             self.create_task(name='Write to parquet', data=self.camera.create_data_frame_to_parquet(),
@@ -108,7 +109,7 @@ class CameraAndNNProcess(BaseProcess):
 
     # задача потока работы с задачами
     def work_with_task(self):
-        while self.b_work or not self.b_pipe_free or not self.b_queue_free:
+        while (self.b_work or not self.b_pipe_free or not self.b_queue_free) and not self.b_force_stop:
             b_queue_from_main_free = self.from_main_task_executor.work()
             b_queue_from_ui_free = self.from_ui_task_executor.work()
             b_queue_from_parquet_free = self.from_parquet_task_executor.work()
@@ -166,6 +167,7 @@ class CameraAndNNProcess(BaseProcess):
         elif name == 'Stop module':
             self.b_create_task = False
             self.b_work = False
+            self.b_force_stop = True
         else:
             self.create_logging_task(data=f'Camera process default task  solution is not defined, task name {name}')
 
