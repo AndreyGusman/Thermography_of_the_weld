@@ -55,3 +55,61 @@ class DataFormat:
     fromCamera = {'ReqActualZoom+': None, 'ReqActualZoom-': None, 'ReqActualFocus+': None, 'ReqActualFocus-': None}
 
     using_transfocator_var_name = ['ReqActualZoom+', 'ReqActualZoom-', 'ReqActualFocus+', 'ReqActualFocus-']
+
+    shared_array_index = {
+        'main_p_is_alive': 0,
+        'main_p_pipe_worker_thread_is_alive': 1,
+        'main_p_task_creater_thread_is_alive': 2,
+        'main_p_task_executor_thread_is_alive': 3,
+        'main_p_force_stop': 4,
+        'main_p_reserve_0': 5,
+        'main_p_reserve_1': 6,
+        'main_p_reserve_2': 7,
+        'main_p_reserve_3': 8,
+        'main_p_reserve_4': 9,
+
+        'camera_and_nn_p_is_alive': 10,
+        'camera_and_nn_p_pipe_worker_thread_is_alive': 11,
+        'camera_and_nn_p_task_creater_thread_is_alive': 12,
+        'camera_and_nn_p_task_executor_thread_is_alive': 13,
+        'camera_and_nn_p_force_stop': 14,
+        'camera_and_nn_p_reserve_0': 15,
+        'camera_and_nn_p_reserve_1': 16,
+        'camera_and_nn_p_reserve_2': 17,
+        'camera_and_nn_p_reserve_3': 18,
+        'camera_and_nn_p_reserve_4': 19,
+
+        'parquet_p_is_alive': 20,
+        'parquet_p_pipe_worker_thread_is_alive': 21,
+        'parquet_p_task_creater_thread_is_alive': 22,
+        'parquet_p_task_executor_thread_is_alive': 23,
+        'parquet_p_force_stop': 24,
+        'parquet_p_reserve_0': 25,
+        'parquet_p_reserve_1': 26,
+        'parquet_p_reserve_2': 27,
+        'parquet_p_reserve_3': 28,
+        'parquet_p_reserve_4': 29,
+
+        'hmi_p_is_alive': 30,
+        'hmi_p_pipe_worker_thread_is_alive': 31,
+        'hmi_p_task_creater_thread_is_alive': 32,
+        'hmi_p_task_executor_thread_is_alive': 33,
+        'hmi_p_force_stop': 34,
+        'hmi_p_reserve_0': 35,
+        'hmi_p_reserve_1': 36,
+        'hmi_p_reserve_2': 37,
+        'hmi_p_reserve_3': 38,
+        'hmi_p_reserve_4': 39,
+
+        'shared_reserve_0': 40,
+        'shared_reserve_1': 41,
+        'shared_reserve_2': 42,
+        'shared_reserve_3': 43,
+        'shared_reserve_4': 44,
+        'shared_reserve_5': 45,
+        'shared_reserve_6': 46,
+        'shared_reserve_7': 47,
+        'shared_reserve_8': 48,
+        'shared_reserve_9': 49
+    }
+

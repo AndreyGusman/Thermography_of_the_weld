@@ -9,7 +9,7 @@ from src.config import Config
 # класс наследуется от базового класса, чтобы иметь нативную поддержку работы с Pipe и Task
 class MainProgram(BaseProcess):
     def __init__(self):
-        super().__init__(None)
+        super().__init__(None, None)
         # собственный экземпляр конфигурации
         self.config = Config()
 
@@ -76,11 +76,18 @@ class MainProgram(BaseProcess):
         self.p_main_btw_camera, self.p_camera_btw_main = multiprocessing.Pipe(duplex=True)
 
     def init_processes(self):
+        self.shared_array = multiprocessing.Array('i', 50, lock=False)
+
+        for i in range(50):
+            self.shared_array[i] = i
+            print(self.shared_array[i])
+
         # инициализация процессов
         self.camera_and_nn_process = CameraAndNNProcess(self.p_camera_btw_ui, self.p_camera_btw_parquet,
-                                                        self.p_camera_btw_main)
-        self.ui_process = UIProcess(self.p_ui_btw_parquet, self.p_ui_btw_camera, self.p_ui_btw_main)
-        self.parquet_process = ParquetProcess(self.p_parquet_btw_ui, self.p_parquet_btw_camera, self.p_parquet_btw_main)
+                                                        self.p_camera_btw_main, self.shared_array)
+        self.ui_process = UIProcess(self.p_ui_btw_parquet, self.p_ui_btw_camera, self.p_ui_btw_main, self.shared_array)
+        self.parquet_process = ParquetProcess(self.p_parquet_btw_ui, self.p_parquet_btw_camera, self.p_parquet_btw_main,
+                                              self.shared_array)
 
     def start_processes(self):
 

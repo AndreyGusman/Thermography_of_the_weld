@@ -3,6 +3,7 @@ from src.processes_and_threading.base_processes_and_threading.base_task import T
 from src.processes_and_threading.base_processes_and_threading.pipe_worker import PipeWorker
 from src.processes_and_threading.base_processes_and_threading.base_thread import BaseThread
 from src.processes_and_threading.base_processes_and_threading.task_executor import TaskExecutor
+from src.data_format import DataFormat
 
 
 class BaseProcess(multiprocessing.Process):
@@ -14,10 +15,12 @@ class BaseProcess(multiprocessing.Process):
 
     """
 
-    def __init__(self, pipe_to_main):
+    def __init__(self, pipe_to_main, shared_array):
         multiprocessing.Process.__init__(self)
         self.pipe_to_main = pipe_to_main
         self.task = Task
+        self.shared_array = shared_array
+        self.sh_arr_index = DataFormat.shared_array_index.copy()
 
     def run(self):
         """
@@ -140,6 +143,7 @@ class BaseProcess(multiprocessing.Process):
         :return: объект экземпляра класса BaseThread() с целевой функцией work
         """
         return BaseThread(work, is_daemon=is_daemon)
+
 
 
 if __name__ == '__main__':

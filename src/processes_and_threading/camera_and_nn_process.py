@@ -6,8 +6,8 @@ import random
 
 
 class CameraAndNNProcess(BaseProcess):
-    def __init__(self, pipe_to_ui, pipe_to_parquet, pipe_to_main):
-        super().__init__(pipe_to_main)
+    def __init__(self, pipe_to_ui, pipe_to_parquet, pipe_to_main, shared_array):
+        super().__init__(pipe_to_main, shared_array)
 
         # инициализация рабочего объекта
         self.camera = Camera()

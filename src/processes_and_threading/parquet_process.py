@@ -7,8 +7,8 @@ from src.io_modul.transfocator import SettingCamera
 
 
 class ParquetProcess(BaseProcess):
-    def __init__(self, pipe_to_ui, pipe_to_camera, pipe_to_main):
-        super().__init__(pipe_to_main)
+    def __init__(self, pipe_to_ui, pipe_to_camera, pipe_to_main, shared_array):
+        super().__init__(pipe_to_main, shared_array)
 
         # инициализация рабочего объекта
         self.parquet_writer = ParquetWriter(self)
