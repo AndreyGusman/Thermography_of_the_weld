@@ -151,13 +151,13 @@ class UIProcess(BaseProcess):
         elif name == 'Update profibus status':
             self.ui_window.set_status_profibus(data)
         elif name == 'Metadata from parquet':
-            self.ui_window.arch_win.set_metadata(data)
+            self.ui_window.arch_win.file_controller.set_metadata(data)
         elif name == 'Plc data from parquet':
-            self.ui_window.arch_win.set_plc_data(data)
+            self.ui_window.arch_win.file_controller.set_plc_data(data)
         elif name == 'Image from parquet file':
-            self.ui_window.arch_win.associate_img_and_plc_data(data)
+            self.ui_window.arch_win.file_controller.associate_img_and_plc_data(data)
         elif name == 'Register parquet file':
-            self.ui_window.arch_win.parquet_analyser.register_parquet_file(data)
+            self.ui_window.arch_win.file_controller.parquet_analyser.register_parquet_file(data)
         elif name == 'next task':
             pass
         elif name == 'next task':

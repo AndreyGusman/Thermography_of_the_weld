@@ -14,10 +14,14 @@ class LoadedParquetFile:
         self.image_and_plc_data = plc_data
 
     def associate_img_and_plc_data(self, img_data):
-        self.image_and_plc_data[f'Image {img_data["Image id"]}']['Image'] = img_data['Image']
-        self.screen_reference.set_text_parquet_info(text=f'Получен кадр №{img_data["Image id"]} из '
-                                                         f'{self.metadata.get("number_frames")} '
-                                                         f'parquet файла {self.file_name}')
+        try:
+            self.image_and_plc_data[f'Image {img_data["Image id"]}']['Image'] = img_data['Image']
+            self.screen_reference.set_text_parquet_info(text=f'Получен кадр №{img_data["Image id"]} из '
+                                                             f'{self.metadata.get("number_frames")} '
+                                                             f'parquet файла {self.file_name}')
+        except KeyError:
+            print(f"Image {img_data['Image id']} not associate")
+            return
 
         if img_data["Image id"] == self.metadata.get('number_frames'):
             self.is_loaded = True

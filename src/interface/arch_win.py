@@ -2,8 +2,8 @@ from PyQt5.QtWidgets import (QLabel, QDateTimeEdit,
                              QPushButton, QCalendarWidget, QSpinBox, QScrollBar,
                              QFileSystemModel, QTreeView
                              )
-from src.interface.loaded_parquet_file import LoadedParquetFile
-from src.interface.parquet_analyser import ParquetAnalyser
+from src.interface.load_file_controller import LoadFileController
+
 from ..config import Config
 import datetime
 from pathlib import Path
@@ -16,10 +16,7 @@ class ArchWin:
         self.process_reference = process_reference
 
         # атрибуты экземпляра для решения задачи
-        self.parquet_analyser = ParquetAnalyser()
-        self.current_view_pq_file = LoadedParquetFile(self, is_current_file=True)
-        self.next_view_pq_file = LoadedParquetFile(self)
-        self.previous_view_pq_file = LoadedParquetFile(self)
+        self.file_controller = LoadFileController(self, self.process_reference)
 
         self.last_selected_file = None
         self.last_scroll_value = None
@@ -74,51 +71,11 @@ class ArchWin:
         self.btn_Set_DT.clicked.connect(self.set_dt)
         self.T_Parquet.doubleClicked.connect(self._on_double_clicked)
 
-    def associate_img_and_plc_data(self, img_data):
-        file_name = img_data.pop('File name')
-        if file_name == self.current_view_pq_file.file_name:
-            self.current_view_pq_file.associate_img_and_plc_data(img_data)
-            if self.current_view_pq_file.is_loaded and self.next_view_pq_file.file_name is not None:
-                self.process_reference.get_parquet_file(self.next_view_pq_file.file_name)
-
-        elif file_name == self.next_view_pq_file.file_name:
-            self.next_view_pq_file.associate_img_and_plc_data(img_data)
-            if self.next_view_pq_file.is_loaded and self.previous_view_pq_file.file_name is not None:
-                self.process_reference.get_parquet_file(self.previous_view_pq_file.file_name)
-
-        elif file_name == self.previous_view_pq_file.file_name:
-            self.previous_view_pq_file.associate_img_and_plc_data(img_data)
-
-    def set_metadata(self, metadata: dict):
-        file_name = metadata.pop('File name')
-        if file_name == self.current_view_pq_file.file_name:
-            self.current_view_pq_file.set_metadata(metadata)
-            self.set_text_parquet_info(text=f'Получены метаданные файла {file_name}')
-        elif file_name == self.next_view_pq_file.file_name:
-            self.next_view_pq_file.set_metadata(metadata)
-            self.set_text_parquet_info(text=f'Получены метаданные файла {file_name}')
-        elif file_name == self.previous_view_pq_file.file_name:
-            self.previous_view_pq_file.set_metadata(metadata)
-            self.set_text_parquet_info(text=f'Получены метаданные файла {file_name}')
-        # self.ScrollBar_Parquet.setMaximum(self.metadata['number_frames'])
-
-    def set_plc_data(self, plc_data):
-        file_name = plc_data.pop('File name')
-        if file_name == self.current_view_pq_file.file_name:
-            self.current_view_pq_file.set_plc_data(plc_data)
-            self.set_text_parquet_info(text=f'Получены данные ПЛК файла {file_name}')
-        elif file_name == self.next_view_pq_file.file_name:
-            self.next_view_pq_file.set_plc_data(plc_data)
-            self.set_text_parquet_info(text=f'Получены данные ПЛК файла {file_name}')
-        elif file_name == self.previous_view_pq_file.file_name:
-            self.previous_view_pq_file.set_plc_data(plc_data)
-            self.set_text_parquet_info(text=f'Получены данные ПЛК файла {file_name}')
-
     def show_img(self):
         select_img_id = self.ScrollBar_Parquet.value()
 
         key = f'Image {select_img_id}'
-        self.current_view_pq_file.get_img_and_plc_data(key, select_img_id)
+        self.file_controller.current_view_pq_file.get_img_and_plc_data(key, select_img_id)
 
         if select_img_id != self.ScrollBar_Parquet.minimum() or select_img_id != self.ScrollBar_Parquet.maximum():
             self.slider_over_value = 0
@@ -130,72 +87,16 @@ class ArchWin:
         else:
             self.slider_over_value = 0
         if self.slider_over_value >= 2 and self.last_scroll_value == self.ScrollBar_Parquet.minimum():
-            self.replace_previous_file()
+            self.file_controller.replace_previous_file()
         if self.slider_over_value >= 2 and self.last_scroll_value == self.ScrollBar_Parquet.maximum():
-            self.replace_next_file()
-
-    def replace_previous_file(self):
-        if isinstance(self.previous_view_pq_file.file_name, str) and \
-                isinstance(self.previous_view_pq_file.metadata, dict) and \
-                isinstance(self.previous_view_pq_file.image_and_plc_data, dict):
-            self.set_text_parquet_info(text=f'Подгружен предыдущий parquet файл {self.previous_view_pq_file.file_name}')
-
-            data1, data2, data3 = self.current_view_pq_file.get_all_data()
-            self.next_view_pq_file.set_all_data(data1, data2, data3)
-
-            data1, data2, data3 = self.previous_view_pq_file.get_all_data()
-            self.current_view_pq_file.set_all_data(data1, data2, data3)
-
-            last_key = list(self.current_view_pq_file.image_and_plc_data.keys())[-1]
-            last_key = last_key.split(' ')[-1]
-            self.ScrollBar_Parquet.setMaximum(int(last_key))
-            if self.current_view_pq_file.is_loaded:
-                self.ScrollBar_Parquet.setValue(self.current_view_pq_file.metadata.get('number_frames'))
-                self.show_img()
-
-            self.previous_view_pq_file.clear_data()
-            _, self.previous_view_pq_file.file_name = self.parquet_analyser.check_neighboring_file(
-                self.current_view_pq_file.file_name)
-            if self.previous_view_pq_file.file_name is not None:
-                self.process_reference.get_parquet_file(self.previous_view_pq_file.file_name)
-        else:
-            self.hmi_reference.show_message(title='Внимание!',
-                                            message='Предыдущего parquet файла не существует')
-
-    def replace_next_file(self):
-        if isinstance(self.next_view_pq_file.file_name, str) and \
-                isinstance(self.next_view_pq_file.metadata, dict) and \
-                isinstance(self.next_view_pq_file.image_and_plc_data, dict):
-            self.set_text_parquet_info(text=f'Подгружен следующий parquet файл {self.next_view_pq_file.file_name}')
-
-            data1, data2, data3 = self.current_view_pq_file.get_all_data()
-            self.previous_view_pq_file.set_all_data(data1, data2, data3)
-
-            data1, data2, data3 = self.next_view_pq_file.get_all_data()
-            self.current_view_pq_file.set_all_data(data1, data2, data3)
-
-            last_key = list(self.current_view_pq_file.image_and_plc_data.keys())[-1]
-            last_key = last_key.split(' ')[-1]
-            self.ScrollBar_Parquet.setMaximum(int(last_key))
-            if self.current_view_pq_file.is_loaded:
-                self.ScrollBar_Parquet.setValue(1)
-                self.show_img()
-
-            self.next_view_pq_file.clear_data()
-            self.next_view_pq_file.file_name, _ = self.parquet_analyser.check_neighboring_file(
-                self.current_view_pq_file.file_name)
-            if self.next_view_pq_file.file_name is not None:
-                self.process_reference.get_parquet_file(self.next_view_pq_file.file_name)
-        else:
-            self.hmi_reference.show_message(title='Внимание!',
-                                            message='Следующего parquet файла не существует')
+            self.file_controller.replace_next_file()
 
     def _on_double_clicked(self):
         index = self.T_Parquet.currentIndex()
         file_path = self.model.filePath(index)
         spl_file_path = file_path.split('.')
         if spl_file_path[-1] == 'parquet':
-            self.check_file_is_load(file_path)
+            self.file_controller.check_file_is_load(file_path)
         else:
             self.set_text_parquet_info(text=f'Выбранный файл не имеет расширение .parquet')
 
@@ -242,36 +143,6 @@ class ArchWin:
 
     def set_val_hour(self, val):
         self.B_Hour.setValue(val)
-
-    def check_file_is_load(self, file_path):
-        if file_path == self.current_view_pq_file.file_name:
-            print('file is load')
-            return
-        else:
-
-            if file_path == self.previous_view_pq_file.file_name:
-                if isinstance(self.previous_view_pq_file.file_name, str) and \
-                        isinstance(self.previous_view_pq_file.metadata, dict) and \
-                        isinstance(self.previous_view_pq_file.image_and_plc_data, dict):
-                    self.replace_previous_file()
-                    print('load prev file')
-                    return
-
-            if file_path == self.next_view_pq_file.file_name:
-                if isinstance(self.next_view_pq_file.file_name, str) and \
-                        isinstance(self.next_view_pq_file.metadata, dict) and \
-                        isinstance(self.next_view_pq_file.image_and_plc_data, dict):
-                    self.replace_next_file()
-                    print('load next file')
-                    return
-
-            self.process_reference.get_parquet_file(file_path)
-            self.set_text_parquet_info(text=f'Создан запрос на чтение файда {file_path}')
-            self.current_view_pq_file.file_name = file_path
-            self.next_view_pq_file.file_name, self.previous_view_pq_file.file_name = self.parquet_analyser.check_neighboring_file(
-                file_path)
-            print('load new file')
-            return
 
     def set_text_parquet_info(self, text):
         resized_text = self.resize_str_len(text)
